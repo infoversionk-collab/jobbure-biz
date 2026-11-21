@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>職ブレ-Business-｜ログイン</title>
+  <style>
+    :root{--navy:#172b4d;--blue:#2866a5;--line:#dce3ec;--muted:#64748b;--bg:#f4f7fb;--green:#16845b}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(135deg,#edf3fa,#f8fafc 55%,#eaf1f8);color:#1d2939;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;display:flex;align-items:center;justify-content:center;padding:22px}
+    .shell{width:min(100%,480px)}
+    .brand{text-align:center;margin-bottom:20px}
+    .mark{width:54px;height:54px;border-radius:16px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900;font-size:23px;margin:0 auto 12px;box-shadow:0 8px 22px #172b4d24}
+    h1{font-size:25px;letter-spacing:.02em;margin:0 0 6px;color:var(--navy)}
+    .brand p{margin:0;color:var(--muted);font-size:13px}
+    .panel{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:30px;box-shadow:0 18px 55px #1e35500d}
+    .eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--blue);margin-bottom:9px}
+    h2{font-size:20px;margin:0 0 10px}
+    .lead{font-size:14px;line-height:1.8;color:#526174;margin:0 0 20px}
+    .status{padding:13px 14px;border-radius:11px;background:#edf4fb;color:#28527e;font-size:13px;line-height:1.7;margin-bottom:16px}
+    .status.error{background:#fff1f1;color:#a33}
+    .status.success{background:#eaf7ef;color:#176b48}
+    button{width:100%;border:0;border-radius:11px;padding:14px 16px;background:var(--blue);color:#fff;font-size:15px;font-weight:800;cursor:pointer}
+    button:disabled{opacity:.6;cursor:wait}
+    .help{margin-top:20px;padding-top:18px;border-top:1px solid #edf0f4}
+    .help h3{font-size:13px;margin:0 0 9px}
+    .help ol{margin:0;padding-left:20px;color:#64748b;font-size:12px;line-height:1.9}
+    .foot{text-align:center;color:#94a3b8;font-size:11px;margin-top:17px}
+    @media(max-width:480px){body{padding:14px}.panel{padding:23px 19px}h1{font-size:22px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="brand">
+      <div class="mark">職</div>
+      <h1>職ブレ-Business-</h1>
+      <p>企業・個人代理店向け 求人情報プラットフォーム</p>
+    </div>
+    <section class="panel">
+      <div class="eyebrow">PARTNER PORTAL</div>
+      <h2>ログイン</h2>
+      <p class="lead">登録済みのGoogleアカウントで本人確認を行います。職ブレ-Business-の利用登録があるアカウントでアクセスしてください。</p>
+      <div id="status" class="status" role="status" aria-live="polite">ログイン状態を確認しています。</div>
+      <button id="loginButton" type="button" onclick="checkLogin()">Googleアカウントを確認してログイン</button>
+      <div class="help">
+        <h3>ログインできない場合</h3>
+        <ol>
+          <li>利用登録済みのGoogleアカウントでブラウザにログインしてください。</li>
+          <li>「Business利用者」シートで、メールアドレスが正しく登録され、利用状態が「有効」になっているか確認してください。</li>
+          <li>複数のGoogleアカウントを利用している場合は、正しいアカウントに切り替えてから再度お試しください。</li>
+          <li>利用登録がない場合は、Version-Kへ利用申請してください。</li>
+        </ol>
+      </div>
+    </section>
+    <div class="foot"><a href="?page=home" style="color:#64748b;text-decoration:underline">サービス紹介へ戻る</a><br>© 職ブレ-Business-</div>
+  </main>
+<script>
+  function setStatus(message,type){
+    const el=document.getElementById('status');
+    el.textContent=message;
+    el.className='status'+(type?' '+type:'');
+  }
+  function checkLogin(){
+    const btn=document.getElementById('loginButton');
+    btn.disabled=true;
+    btn.textContent='確認しています...';
+    setStatus('Googleアカウントと利用登録を確認しています。');
+    google.script.run
+      .withSuccessHandler(function(user){
+        if(user && user.authenticated){
+          setStatus(user.companyName+' としてログインできます。アプリを開きます。','success');
+          window.top.location.href='?page=app';
+          return;
+        }
+        setStatus((user && user.message) || 'ログインを確認できませんでした。利用登録とGoogleアカウントをご確認ください。','error');
+        btn.disabled=false;
+        btn.textContent='もう一度確認する';
+      })
+      .withFailureHandler(function(error){
+        setStatus(error && error.message ? error.message : '認証確認中にエラーが発生しました。ページを再読み込みしてください。','error');
+        btn.disabled=false;
+        btn.textContent='もう一度確認する';
+      })
+      .getCurrentBusinessUser();
+  }
+  window.addEventListener('load',checkLogin);
+</script>
+</body>
+</html>

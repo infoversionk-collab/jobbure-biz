@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>職ブレ-Business-</title>
+  <style>
+    :root{--navy:#172b4d;--blue:#2866a5;--line:#dce3ec;--muted:#64748b;--bg:#f5f7fb;--green:#16845b}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#1d2939;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+    header{background:var(--navy);color:#fff;padding:18px 24px}
+    header .inner{max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:16px}
+    header h1{font-size:21px;margin:0}header small{color:#d5e2f2}
+    .wrap{max-width:1180px;margin:24px auto;padding:0 18px}
+    .toolbar{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:16px}
+    .tabs{display:flex;gap:8px;margin:0 0 14px}.tabs button.active{background:var(--navy);color:#fff}
+    input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;color:#1d2939}
+    textarea{min-height:110px;resize:vertical}
+    button{border:0;border-radius:9px;padding:11px 15px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer}
+    button.secondary{background:#e8eef6;color:#24405f}
+    button:disabled{opacity:.55;cursor:wait}
+    .muted{color:var(--muted);font-size:12px}
+    .notice{padding:12px 14px;border-radius:10px;background:#eaf2fb;color:#28527e;margin-bottom:14px;font-size:13px}
+    .notice.error{background:#fff0f0;color:#a33}.notice.success{background:#e8f6ee;color:#176b48}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 2px 8px rgba(20,40,70,.04);display:flex;flex-direction:column;gap:10px}
+    .card h3{font-size:17px;margin:0;line-height:1.5}
+    .tags{display:flex;flex-wrap:wrap;gap:6px}
+    .tag{font-size:11px;padding:4px 8px;border-radius:20px;background:#edf2f8;color:#42566f}
+    .amount{font-size:18px;font-weight:800;color:var(--navy)}
+    .card-actions{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
+    .card-actions button{flex:1;min-width:100px;font-size:12px;padding:9px 10px}
+    .empty{background:#fff;border:1px dashed #cbd5e1;border-radius:12px;padding:42px;text-align:center;color:var(--muted)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(15,29,49,.55);display:none;align-items:flex-start;justify-content:center;padding:20px;overflow:auto;z-index:10}
+    .modal-backdrop.show{display:flex}
+    .modal{background:#fff;border-radius:16px;width:min(760px,100%);padding:22px;margin:auto}
+    .modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    .modal-head h2{font-size:20px;margin:0}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+    .detail-item{background:#f6f8fb;padding:12px;border-radius:9px}
+    .detail-item b{display:block;margin-top:5px;white-space:pre-wrap}
+    .section{margin-top:18px}.section h4{margin:0 0 7px;color:#334b68}
+    .section p{white-space:pre-wrap;line-height:1.7;margin:0}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:#475569}
+    .field.full{grid-column:1/-1}
+    #app{display:none}
+    @media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){header{padding:15px}.wrap{padding:0 12px;margin:16px auto}.grid{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr}.detail-grid,.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.modal{padding:16px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div><h1>職ブレ-Business-</h1><small>企業・個人代理店向け 求人情報プラットフォーム</small></div>
+    <div id="userInfo" class="muted" style="color:#d5e2f2">認証確認中...</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="notice" class="notice">ログイン状態を確認しています。</div>
+  <section id="app">
+    <div class="tabs"><button id="allTab" class="active" onclick="switchTab('all')">求人一覧</button><button id="savedTab" class="secondary" onclick="switchTab('saved')">保存した求人</button></div>
+    <div class="toolbar" id="searchToolbar">
+      <input id="q" placeholder="求人名・職種・キーワードで検索">
+      <select id="businessType"><option value="">すべての事業区分</option><option value="BPO">BPO</option><option value="人材紹介">人材紹介</option></select>
+      <input id="location" placeholder="勤務地で絞り込み">
+      <button onclick="loadJobs()">検索</button>
+    </div>
+    <div class="muted" id="count" style="margin:0 0 12px"></div>
+    <div id="jobList" class="grid"></div>
+  </section>
+</main>
+
+<div class="modal-backdrop" id="detailModal" onclick="if(event.target===this)closeModal('detailModal')">
+  <div class="modal">
+    <div class="modal-head"><h2 id="detailTitle">求人詳細</h2><button class="secondary" onclick="closeModal('detailModal')">閉じる</button></div>
+    <div id="detailContent"></div>
+    <div class="card-actions" style="margin-top:18px">
+      <button class="secondary" onclick="toggleSaved(STATE.selectedJob.id)">保存する／解除</button>
+      <button class="secondary" onclick="openDownloadOptions('txt')">TXTをダウンロード</button>
+      <button class="secondary" onclick="openDownloadOptions('pdf')">PDFをダウンロード</button>
+      <button onclick="openInquiry()">Version-Kへ問い合わせ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="downloadModal" onclick="if(event.target===this)closeModal('downloadModal')">
+  <div class="modal">
+    <div class="modal-head"><h2>求人票のダウンロード</h2><button class="secondary" onclick="closeModal('downloadModal')">閉じる</button></div>
+    <div class="field">
+      <label for="downloadAudience">ダウンロード対象</label>
+      <select id="downloadAudience" onchange="updateDownloadFields()">
+        <option value="business">事業者向け</option>
+        <option value="jobseeker">求職者向け</option>
+      </select>
+    </div>
+    <div id="downloadAmountBox" style="display:none;margin-top:14px">
+      <div class="field">
+        <label for="downloadAmount" id="downloadAmountLabel">金額（今回のダウンロードのみ）</label>
+        <input id="downloadAmount" type="text" inputmode="text" placeholder="金額を入力（例：1,600円〜1,800円）">
+      </div>
+      <div class="notice" id="downloadAmountNotice" style="margin-top:10px">
+        元の設定額を上限として入力してください。入力した金額は保存されず、今回のダウンロードにのみ反映されます。
+      </div>
+    </div>
+    <div class="notice" id="regularSalaryWarning" style="display:none;margin-top:10px;color:#9a3412;background:#fff7ed">
+      注意：正社員案件の場合は、給与額の変更はできません。ご注意ください。
+    </div>
+    <div class="notice" id="regularCompanyCapNotice" style="display:none;margin-top:10px;color:#9a3412;background:#fff7ed">
+      正社員案件の貴社報酬額は、Version-K着金額に貴社との契約手数料率を乗じた金額が上限です。上限額を超える金額は設定できません。
+    </div>
+    <div class="card-actions" style="margin-top:18px">
+      <button onclick="executeDownload()">この内容でダウンロード</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="inquiryModal" onclick="if(event.target===this)closeModal('inquiryModal')">
+  <div class="modal">
+    <div class="modal-head"><h2>Version-Kへ問い合わせ</h2><button class="secondary" onclick="closeModal('inquiryModal')">閉じる</button></div>
+    <div class="notice" id="inquiryJobLabel"></div>
+    <form id="inquiryForm" onsubmit="submitInquiry(event)">
+      <div class="form-grid">
+        <div class="field"><label>担当者名 *</label><input id="contactName" required maxlength="100"></div>
+        <div class="field"><label>電話番号</label><input id="phone" maxlength="30"></div>
+        <div class="field full"><label>問い合わせ内容 *</label><textarea id="message" required maxlength="3000" placeholder="紹介希望人数、確認したい条件などを入力してください。"></textarea></div>
+      </div>
+      <div class="card-actions" style="justify-content:flex-end;margin-top:15px">
+        <button type="button" class="secondary" onclick="closeModal('inquiryModal')">キャンセル</button>
+        <button id="sendInquiry" type="submit">問い合わせを送信</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const STATE = {user:null,jobs:[],savedJobs:[],selectedJob:null,tab:"all"};
+  const $ = id => document.getElementById(id);
+
+  function esc(value){
+    return String(value==null?'':value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function notify(message,type){
+    const el=$('notice');el.textContent=message;el.className='notice'+(type?' '+type:'');
+  }
+  function call(name,...args){
+    return new Promise((resolve,reject)=>{
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(err=>reject(new Error(err&&err.message?err.message:String(err))))[name](...args);
+    });
+  }
+  function yen(value){
+    const s=String(value||'').trim();
+    if(!s)return '条件確認';
+    return s;
+  }
+  async function init(){
+    try{
+      const user=await call('getCurrentBusinessUser');
+      if(!user.authenticated){
+        $('userInfo').textContent=user.email||'未認証';
+        notify((user.message||'利用権限がありません。')+' ログイン画面から再度お試しください。','error');
+        $('app').style.display='none';
+        $('notice').innerHTML = esc(user.message||'利用権限がありません。')+' <a href="?page=login" style="font-weight:800;text-decoration:underline">ログイン画面へ戻る</a>';
+        return;
+      }
+      STATE.user=user;
+      $('userInfo').textContent=user.companyName+'（'+user.accountType+'）';
+      $('app').style.display='block';
+      notify('ログインしました。公開中の求人を表示しています。','success');
+      await loadSavedJobs();
+      await loadJobs();
+    }catch(e){notify(e.message,'error');}
+  }
+  async function loadSavedJobs(){
+    try{
+      STATE.savedJobs=await call('getBusinessSavedJobs');
+      for(const saved of STATE.savedJobs){
+        if(!STATE.jobs.some(j=>j.id===saved.id)){
+          try{ STATE.jobs.push(await call('getBusinessJob',saved.id)); }catch(_e){}
+        }
+      }
+    }catch(e){ notify(e.message,'error'); }
+  }
+  function switchTab(tab){
+    STATE.tab=tab;
+    $('allTab').classList.toggle('active',tab==='all');
+    $('savedTab').classList.toggle('active',tab==='saved');
+    $('allTab').classList.toggle('secondary',tab!=='all');
+    $('savedTab').classList.toggle('secondary',tab!=='saved');
+    $('searchToolbar').style.display=tab==='all'?'grid':'none';
+    if(tab==='saved') loadSavedJobs().then(renderJobs); else renderJobs();
+  }
+  async function toggleSaved(jobId){
+    try{
+      const exists=STATE.savedJobs.some(x=>x.id===jobId);
+      if(exists) await call('removeBusinessSavedJob',jobId);
+      else await call('saveBusinessJob',jobId);
+      await loadSavedJobs();
+      renderJobs();
+      notify(exists?'保存を解除しました。':'求人を保存しました。','success');
+    }catch(e){ notify(e.message,'error'); }
+  }
+  async function loadJobs(){
+    try{
+      const filters={q:$('q').value,businessType:$('businessType').value,location:$('location').value};
+      STATE.jobs=await call('listBusinessJobs',filters);
+      renderJobs();
+    }catch(e){notify(e.message,'error');}
+  }
+  function renderJobs(){
+    const list=STATE.tab==='saved'
+      ? STATE.savedJobs.map(s=>STATE.jobs.find(j=>j.id===s.id)).filter(Boolean)
+      : STATE.jobs;
+    $('count').textContent=list.length+'件の求人'+(STATE.tab==='saved'?'を保存中':'');
+    if(!list.length){
+      $('jobList').innerHTML='<div class="empty" style="grid-column:1/-1">'+(STATE.tab==='saved'?'保存した求人はありません。':'該当する求人がありません。')+'</div>';return;
+    }
+    $('jobList').innerHTML=list.map(job=>{
+      const saved=STATE.savedJobs.some(x=>x.id===job.id);
+      const isRegular=job.employmentType&&job.employmentType.includes('正社員');
+      const price=isRegular
+        ? (job.salary||'給与条件確認')
+        : (job.amount||'条件確認');
+      const rewardLine=isRegular
+        ? `<div class="amount" style="font-size:15px;margin-top:-4px">報酬（紹介手数料）：${esc(job.rewardAmount||'金額確認中')}</div>`
+        : '';
+      return `
+      <article class="card">
+        <div class="tags"><span class="tag">${esc(job.businessType)}</span><span class="tag">${esc(job.employmentType)}</span><span class="tag">募集中</span></div>
+        <h3>${esc(job.title)}</h3>
+        <div class="muted">${esc(job.jobType)}　／　${esc(job.location||'勤務地未設定')}</div>
+        <div class="amount">${esc(price)}</div>
+        ${rewardLine}
+        <div class="muted">${esc(job.remote||'')} ${job.startDate?'／ 開始 '+esc(job.startDate):''}</div>
+        <div class="card-actions">
+          <button onclick="showDetail('${esc(job.id)}')">求人詳細を見る</button>
+          <button class="secondary" onclick="toggleSaved('${esc(job.id)}')">${saved?'保存解除':'保存する'}</button>
+        </div>
+      </article>`;
+    }).join('');
+  }
+  async function showDetail(id){
+    try{
+      const job=await call('getBusinessJob',id);
+      STATE.selectedJob=job;
+      $('detailTitle').textContent=job.title;
+      const isRegular=job.employmentType&&job.employmentType.includes('正社員');
+      const isBpo=!!job.isBpo || String(job.businessType||'').toUpperCase().includes('BPO');
+      const baseItems=[
+        ['事業区分',job.businessType],['職種',job.jobType],['雇用形態',job.employmentType]
+      ].filter(x=>String(x[1]||'').trim()!=='');
+      const compensationItems=isRegular
+        ? [['給与',job.salary],['報酬額',job.rewardAmount],['交通費',job.transport]]
+        : (isBpo ? [['貴社卸単価',job.wholesaleUnit||job.amount],['交通費',job.transport]] : [['給与',job.salary],['交通費',job.transport]]);
+      const detailItems=[
+        ['稼働時間',job.hours],['勤務時間帯',job.schedule],['勤務地',job.location],
+        ['最寄駅',job.station],['リモート条件',job.remote],['休日',job.holidays],
+        ['勤務開始日',job.startDate],['募集終了日',job.endDate]
+      ].filter(x=>String(x[1]||'').trim()!=='');
+      const panel=items=>items.filter(x=>String(x[1]||'').trim()!=='').map(x=>`<div class="detail-item"><span class="muted">${esc(x[0])}</span><b>${esc(x[1])}</b></div>`).join('');
+      const seekerNote=isBpo?'求職者へ提出する際は、候補者に提示する時給に合わせて給与欄を調整してご活用ください。':'求職者へ提出する際は、掲載内容をご確認のうえ、候補者への求人案内にご活用ください。';
+      $('detailContent').innerHTML=`
+        <div class="muted">案件番号：${esc(job.id)}</div>
+        <div class="detail-grid">${panel(baseItems)}</div>
+        <div class="compensation-panel">
+          <h3>給与・報酬</h3>
+          <div class="detail-grid">${panel(compensationItems)}</div>
+          <p class="compensation-note">※給料・報酬額は内定時に確定。<br>金額は税込表示。</p>
+          ${isRegular?'<p class="compensation-note">注意：貴社報酬は、上記金額より貴社契約手数料にてお支払いいたします。</p>':''}
+          ${!isRegular?`<p class="compensation-note">${esc(seekerNote)}</p>`:''}
+        </div>
+        <div class="detail-grid">${panel(detailItems)}</div>
+        ${section('仕事内容',job.description)}
+        ${section('応募条件',job.requirements)}
+        ${section('必須スキル',job.mustSkills)}
+        ${section('歓迎スキル',job.preferredSkills)}
+        ${section('年齢条件',job.age)}
+        ${section('面談回数・選考',job.interview)}
+        ${section('提出書類',job.documents)}
+      `;
+      $('inquiryJobLabel').textContent='対象求人：'+job.title+'（'+job.id+'）';
+      openModal('detailModal');
+    }catch(e){notify(e.message,'error');}
+  }
+  function section(title,value){
+    if(!value)return '';
+    return `<div class="section"><h4>${esc(title)}</h4><p>${esc(value)}</p></div>`;
+  }
+  function openModal(id){$(id).classList.add('show');}
+  function closeModal(id){$(id).classList.remove('show');}
+  let DOWNLOAD_FORMAT='txt';
+  function openDownloadOptions(format){
+    if(!STATE.selectedJob)return;
+    DOWNLOAD_FORMAT=format;
+    $('downloadAudience').value='business';
+    $('downloadAmount').value='';
+    updateDownloadFields();
+    openModal('downloadModal');
+  }
+  function updateDownloadFields(){
+    const job=STATE.selectedJob||{};
+    const audience=$('downloadAudience').value;
+    const isRegular=String(job.employmentType||'').includes('正社員');
+    const isBpo=!!job.isBpo || String(job.businessType||'').toUpperCase().includes('BPO') || String(job.jobType||'').toUpperCase().includes('BPO');
+    const needsAmount=isBpo && audience==='jobseeker';
+    $('downloadAmountBox').style.display=needsAmount?'block':'none';
+    $('regularSalaryWarning').style.display='none';
+    $('regularCompanyCapNotice').style.display='none';
+    $('downloadAmount').required=needsAmount;
+    $('downloadAmount').value='';
+    let label='金額（今回のダウンロードのみ）';
+    let placeholder='元の設定額以内で入力';
+    let notice='元の設定額を上限として入力してください。入力した金額は保存されず、今回のダウンロードにのみ反映されます。';
+    if(isBpo&&audience==='jobseeker'){
+      label='求職者向け給与（時給・今回のダウンロードのみ）';
+      placeholder='例：時給1,500円';
+      notice='元の貴社卸単価を上限として時給を設定できます。求職者に提出する際は、候補者に提示する時給へ調整してご活用ください。';
+    }else if(isBpo&&audience==='business'){
+      label='貴社卸単価（今回のダウンロードのみ）';
+      placeholder='例：時給1,500円';
+      notice='「提携企業向け金額｜管理者・提携企業」に設定された元の貴社卸単価の最高額を上限として入力してください。';
+    }else if(isRegular&&audience==='business'){
+      label='貴社報酬額（今回のダウンロードのみ）';
+      placeholder='契約手数料率を反映した上限以内で入力';
+      notice='Version-K着金額に貴社との契約手数料率を乗じた金額が上限です。';
+    }
+    $('downloadAmountLabel').textContent=label;
+    $('downloadAmount').placeholder=placeholder;
+    $('downloadAmountNotice').textContent=notice;
+  }
+  async function executeDownload(){
+    const job=STATE.selectedJob;if(!job)return;
+    const audience=$('downloadAudience').value;
+    const isRegular=String(job.employmentType||'').includes('正社員');
+    const isBpo=!!job.isBpo || String(job.businessType||'').toUpperCase().includes('BPO') || String(job.jobType||'').toUpperCase().includes('BPO');
+    const needsAmount=isBpo && audience==='jobseeker';
+    const amount=needsAmount?String($('downloadAmount').value).trim():null;
+    if(needsAmount&&!amount){
+      notify('金額を入力してください。','error');return;
+    }
+    try{
+      if(DOWNLOAD_FORMAT==='txt'){
+        const r=await call('downloadBusinessJobText',job.id,audience,amount);
+        const binary=atob(r.base64);const bytes=new Uint8Array(binary.length);
+        for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+        const blob=new Blob([bytes],{type:r.mimeType});
+        const url=URL.createObjectURL(blob);const a=document.createElement('a');
+        a.href=url;a.download=r.fileName;document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+      }else{
+        const r=await call('downloadBusinessJobPdf',job.id,audience,amount);
+        const w=window.open(r.url,'_blank');
+        if(!w)window.location.href=r.downloadUrl;
+      }
+      closeModal('downloadModal');
+      notify('求人票を作成しました。','success');
+    }catch(e){notify(e.message,'error');}
+  }
+  function openInquiry(){
+    if(!STATE.selectedJob)return;
+    $('inquiryForm').reset();
+    closeModal('detailModal');openModal('inquiryModal');
+  }
+  async function submitInquiry(event){
+    event.preventDefault();
+    const btn=$('sendInquiry');btn.disabled=true;btn.textContent='送信中...';
+    try{
+      const r=await call('submitBusinessInquiry',{
+        jobId:STATE.selectedJob.id,
+        contactName:$('contactName').value,
+        phone:$('phone').value,
+        message:$('message').value
+      });
+      closeModal('inquiryModal');
+      notify(r.message+' 問い合わせ番号：'+r.inquiryId,'success');
+    }catch(e){notify(e.message,'error');}
+    finally{btn.disabled=false;btn.textContent='問い合わせを送信';}
+  }
+  init();
+</script>
+</body>
+</html>
+
