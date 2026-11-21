@@ -1,0 +1,798 @@
+/**
+ * 職ブレ-Business-｜企業・個人代理店向け求人閲覧アプリ
+ * Google Apps Script V8
+ *
+ * 【接続先（確定値）】
+ * スプレッドシートID：1fybpO4c2RpzqLJRqOITO9a_zY8Za_K4acQmedZOPpuQ
+ * 求人票保存フォルダーID：1Uzj9toUi0nNVmuWC-NdVSEYaSCm688df
+ * 職ブレ本体の求人情報を直接参照し、Business用に必要な項目だけ返す。
+ *
+ * 既存の「案件管理」シートを読み取り、案件番号をキーに表示する。
+ * 既存シートの求人データは複製・二重管理しない。
+ * 新規作成するシートは「Business利用者」「Business問い合わせ管理」のみ。
+ */
+
+const BUSINESS = {
+  TITLE: '職ブレ-Business-',
+  TZ: 'Asia/Tokyo',
+  PROP: {
+    MASTER_ID: 'BUSINESS_MASTER_SPREADSHEET_ID',
+    PDF_FOLDER_ID: 'BUSINESS_PDF_FOLDER_ID',
+    ADMIN_EMAILS: 'BUSINESS_ADMIN_EMAILS',
+    ADMIN_EMAIL: 'BUSINESS_ADMIN_EMAIL'
+  },
+  SHEET: {
+    JOBS: '案件管理',
+    ACCOUNTS: 'Business利用者',
+    INQUIRIES: 'Business問い合わせ管理',
+    SAVED: 'Business保存求人'
+  },
+  MASTER_SPREADSHEET_ID: '1fybpO4c2RpzqLJRqOITO9a_zY8Za_K4acQmedZOPpuQ',
+  PDF_FOLDER_ID_FROM_JOBBURE: '1Uzj9toUi0nNVmuWC-NdVSEYaSCm688df',
+  ACCOUNT_HEADERS: ['メールアドレス','企業名','利用区分','利用状態','登録日時','更新日時','契約手数料率'],
+  INQUIRY_HEADERS: ['問い合わせID','受付日時','案件番号','案件名','企業名','担当者名','メールアドレス','電話番号','問い合わせ内容','対応状況'],
+  SAVED_HEADERS: ['保存キー','企業名','利用区分','案件番号','案件名','保存日時','保存者メールアドレス']
+};
+
+function doGet(e) {
+  const page = e && e.parameter ? String(e.parameter.page || '') : '';
+  const fileName = page === 'app' ? 'index' : 'login';
+  return HtmlService.createHtmlOutputFromFile(fileName)
+    .setTitle(BUSINESS.TITLE + (page === 'app' ? '｜求人一覧' : '｜ログイン'))
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+/**
+ * 初回接続設定。
+ * masterSpreadsheetId は職ブレ側の Script Properties
+ * JOBBURE_MASTER_SPREADSHEET_ID と同じ値を指定する。
+ * 空欄の場合は、BUSINESS_MASTER_SPREADSHEET_ID が既に設定済みであること。
+ */
+function setupBusinessConnection(masterSpreadsheetId, pdfFolderId) {
+  const props = PropertiesService.getScriptProperties();
+  const masterId = String(masterSpreadsheetId || BUSINESS.MASTER_SPREADSHEET_ID).trim();
+  const folderId = String(pdfFolderId || BUSINESS.PDF_FOLDER_ID_FROM_JOBBURE).trim();
+  if (!masterId) {
+    throw new Error('職ブレの Script Properties にある JOBBURE_MASTER_SPREADSHEET_ID と同じスプレッドシートIDを指定してください。');
+  }
+  const ss = SpreadsheetApp.openById(masterId);
+  if (!ss.getSheetByName(BUSINESS.SHEET.JOBS)) {
+    throw new Error('接続先に「案件管理」シートがありません。職ブレで使用しているスプレッドシートIDを確認してください。');
+  }
+  const folder = DriveApp.getFolderById(folderId);
+  folder.getName();
+
+  props.setProperty(BUSINESS.PROP.MASTER_ID, masterId);
+  props.setProperty(BUSINESS.PROP.PDF_FOLDER_ID, folderId);
+
+  ensureSheet_(ss, BUSINESS.SHEET.ACCOUNTS, BUSINESS.ACCOUNT_HEADERS);
+  ensureSheet_(ss, BUSINESS.SHEET.INQUIRIES, BUSINESS.INQUIRY_HEADERS);
+  ensureSheet_(ss, BUSINESS.SHEET.SAVED, BUSINESS.SAVED_HEADERS);
+  return {
+    ok: true,
+    spreadsheetName: ss.getName(),
+    spreadsheetId: masterId,
+    pdfFolderName: folder.getName(),
+    pdfFolderId: folderId,
+    message: '職ブレと同じスプレッドシート・求人票保存フォルダへの接続が完了しました。'
+  };
+}
+
+/**
+ * 確定済みIDで接続情報を再設定する関数。
+ * GASエディタから resetBusinessConnection を選択して実行する。
+ */
+function resetBusinessConnection() {
+  return setupBusinessConnection(
+    BUSINESS.MASTER_SPREADSHEET_ID,
+    BUSINESS.PDF_FOLDER_ID_FROM_JOBBURE
+  );
+}
+
+/**
+ * 接続確認用。ID全文や利用者の個人情報は返さない。
+ */
+function testBusinessConnection() {
+  const ss = getMaster_();
+  const folderId = PropertiesService.getScriptProperties().getProperty(BUSINESS.PROP.PDF_FOLDER_ID)
+    || BUSINESS.PDF_FOLDER_ID_FROM_JOBBURE;
+  const folder = DriveApp.getFolderById(folderId);
+  return {
+    ok: !!ss.getSheetByName(BUSINESS.SHEET.JOBS),
+    spreadsheetName: ss.getName(),
+    hasJobsSheet: !!ss.getSheetByName(BUSINESS.SHEET.JOBS),
+    hasAccountsSheet: !!ss.getSheetByName(BUSINESS.SHEET.ACCOUNTS),
+    hasInquiriesSheet: !!ss.getSheetByName(BUSINESS.SHEET.INQUIRIES),
+    pdfFolderName: folder.getName()
+  };
+}
+
+function getMaster_() {
+  const id = PropertiesService.getScriptProperties().getProperty(BUSINESS.PROP.MASTER_ID);
+  if (!id) throw new Error('接続設定がありません。setupBusinessConnection() を実行してください。');
+  return SpreadsheetApp.openById(id);
+}
+
+function ensureSheet_(ss, name, headers) {
+  let sh = ss.getSheetByName(name);
+  if (!sh) sh = ss.insertSheet(name);
+  if (sh.getLastRow() === 0) {
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sh.setFrozenRows(1);
+    sh.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#e8eef7');
+  } else {
+    const current = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0];
+    const normalized = current.map(norm_);
+    headers.forEach(h => {
+      if (!normalized.includes(norm_(h))) {
+        sh.getRange(1, sh.getLastColumn() + 1).setValue(h);
+        normalized.push(norm_(h));
+      }
+    });
+  }
+  return sh;
+}
+
+function norm_(v) {
+  return String(v == null ? '' : v).replace(/\s+/g, '').toLowerCase();
+}
+
+function headerMap_(headers) {
+  const map = {};
+  headers.forEach((h, i) => map[String(h)] = i);
+  return map;
+}
+
+/**
+ * 利用者は管理者が「Business利用者」シートに登録する。
+ * 利用状態は「有効」の行だけログインできる。
+ * ログイン時のGoogleアカウントメールアドレスを照合する。
+ */
+function getCurrentBusinessUser() {
+  const email = String(Session.getActiveUser().getEmail() || '').trim().toLowerCase();
+  if (!email) {
+    return { authenticated: false, message: 'Googleアカウントのメールアドレスを確認できません。Webアプリのデプロイ設定を確認してください。' };
+  }
+  const user = findBusinessUser_(email);
+  if (!user) return { authenticated: false, email: email, message: '利用登録がありません。Version-Kへ利用申請してください。' };
+  return { authenticated: true, email: email, companyName: user.companyName, accountType: user.accountType, commissionRate: user.commissionRate };
+}
+
+function findBusinessUser_(email) {
+  const ss = getMaster_();
+  const sh = ss.getSheetByName(BUSINESS.SHEET.ACCOUNTS);
+  if (!sh || sh.getLastRow() < 2) return null;
+  const values = sh.getDataRange().getDisplayValues();
+  const ix = headerMap_(values[0]);
+  const row = values.slice(1).find(r =>
+    String(r[ix['メールアドレス']] || '').trim().toLowerCase() === email &&
+    String(r[ix['利用状態']] || '').trim() === '有効'
+  );
+  if (!row) return null;
+  return {
+    email: String(row[ix['メールアドレス']] || ''),
+    companyName: String(row[ix['企業名']] || ''),
+    accountType: String(row[ix['利用区分']] || '企業'),
+    commissionRate: row[ix['契約手数料率']] === undefined ? '' : row[ix['契約手数料率']]
+  };
+}
+
+function assertBusinessUser_() {
+  const result = getCurrentBusinessUser();
+  if (!result.authenticated) throw new Error(result.message || 'Business利用権限がありません。');
+  return result;
+}
+
+/**
+ * 管理者が利用者を追加する関数。
+ * BUSINESS_ADMIN_EMAILS に管理者メールアドレスをカンマ区切りで登録する。
+ */
+function saveBusinessUser(payload) {
+  const admin = String(Session.getActiveUser().getEmail() || '').trim().toLowerCase();
+  const adminProps = PropertiesService.getScriptProperties();
+  const allow = String(
+    adminProps.getProperty(BUSINESS.PROP.ADMIN_EMAILS) ||
+    adminProps.getProperty(BUSINESS.PROP.ADMIN_EMAIL) || ''
+  ).split(/[;,\n]/).map(x => x.trim().toLowerCase()).filter(Boolean);
+  if (!admin || !allow.includes(admin)) throw new Error('管理者権限がありません。');
+
+  payload = payload || {};
+  const email = String(payload.email || '').trim().toLowerCase();
+  const company = String(payload.companyName || '').trim();
+  const type = String(payload.accountType || '企業').trim();
+  const status = String(payload.status || '有効').trim();
+  const commissionRateRaw = payload.commissionRate === undefined ? '' : String(payload.commissionRate).trim();
+  let commissionRate = commissionRateRaw === '' ? '' : Number(commissionRateRaw.replace(/％|%/g, '').trim());
+  if (commissionRateRaw !== '' && (!isFinite(commissionRate) || commissionRate < 0 || commissionRate > 100)) {
+    throw new Error('契約手数料率は0〜100の数値（％）で入力してください。');
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('正しいメールアドレスを入力してください。');
+  if (!company) throw new Error('企業名・代理店名を入力してください。');
+  if (!['企業','個人代理店'].includes(type)) throw new Error('利用区分が正しくありません。');
+  if (!['有効','停止'].includes(status)) throw new Error('利用状態が正しくありません。');
+
+  const sh = ensureSheet_(getMaster_(), BUSINESS.SHEET.ACCOUNTS, BUSINESS.ACCOUNT_HEADERS);
+  const values = sh.getDataRange().getDisplayValues();
+  const ix = headerMap_(values[0]);
+  let row = 0;
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][ix['メールアドレス']] || '').trim().toLowerCase() === email) {
+      row = i + 1;
+      break;
+    }
+  }
+  const now = new Date();
+  if (!row) {
+    row = sh.getLastRow() + 1;
+    sh.getRange(row, ix['登録日時'] + 1).setValue(now);
+  } else if (payload.commissionRate === undefined) {
+    commissionRate = sh.getRange(row, ix['契約手数料率'] + 1).getValue();
+  }
+  const data = {
+    'メールアドレス': email,
+    '企業名': company,
+    '利用区分': type,
+    '利用状態': status,
+    '更新日時': now,
+    '契約手数料率': commissionRate
+  };
+  Object.keys(data).forEach(k => sh.getRange(row, ix[k] + 1).setValue(data[k]));
+  return { ok: true, email: email, companyName: company, status: status };
+}
+
+/**
+ * 公開求人一覧。
+ * 職ブレ「案件管理」から直接読み取るため、更新内容は次回表示時に反映される。
+ * 公開条件：ステータス=募集中、提携先公開=TRUE、募集終了日が未到来。
+ */
+function getVersionKAmountValue_(get) {
+  const names = ['Version-K着金額', 'VersionK着金額', 'Version-K 着金額', '弊社着金額', '紹介手数料'];
+  for (const name of names) {
+    const value = get(name);
+    if (value !== '' && value != null) return value;
+  }
+  return '';
+}
+
+function getPartnerWholesaleText_(get) {
+  const names = [
+    '提携企業向け金額｜管理者・提携企業',
+    '提携企業向け金額|管理者・提携企業',
+    '提携企業向け金額',
+    '卸単価'
+  ];
+  for (const name of names) {
+    const value = get(name);
+    if (value !== '' && value != null) return String(value).trim();
+  }
+  return '';
+}
+
+function extractAmountNumbers_(value) {
+  const matches = String(value == null ? '' : value).match(/\d[\d,]*(?:\.\d+)?/g) || [];
+  return matches.map(x => Number(x.replace(/,/g, ''))).filter(n => isFinite(n));
+}
+
+function getAmountUpperLimit_(value) {
+  const nums = extractAmountNumbers_(value);
+  return nums.length ? Math.max.apply(null, nums) : null;
+}
+
+function formatYenAmount_(value) {
+  if (value === '' || value == null) return '';
+  const n = parseBusinessAmount_(value);
+  return n == null ? String(value) : Math.round(n).toLocaleString('ja-JP') + '円';
+}
+
+function formatRegularSalary_(value) {
+  if (value === '' || value == null) return '';
+  const raw = String(value).trim();
+  const n = parseBusinessAmount_(raw);
+  if (n == null) return raw;
+  return '月給' + Math.round(n).toLocaleString('ja-JP') + '円';
+}
+
+function isBusinessBpoRow_(get) {
+  return String(get('事業区分') || '').toUpperCase().includes('BPO') ||
+    String(get('職種') || '').toUpperCase().includes('BPO') ||
+    String(get('案件区分') || '').toUpperCase().includes('BPO') ||
+    String(get('案件種別') || '').toUpperCase().includes('BPO');
+}
+
+function listBusinessJobs(filters) {
+  const user = assertBusinessUser_();
+  filters = filters || {};
+  const ss = getMaster_();
+  const sh = ss.getSheetByName(BUSINESS.SHEET.JOBS);
+  if (!sh || sh.getLastRow() < 2) return [];
+  const values = sh.getDataRange().getValues();
+  const headers = values[0].map(String);
+  const ix = headerMap_(headers);
+  const q = String(filters.q || '').trim().toLowerCase();
+  const type = String(filters.businessType || '').trim();
+  const location = String(filters.location || '').trim().toLowerCase();
+  const jobs = [];
+
+  values.slice(1).forEach(r => {
+    const get = h => ix[h] == null ? '' : r[ix[h]];
+    const status = String(get('ステータス') || '');
+    const partnerPublish = get('提携先公開') === true || String(get('提携先公開')).toUpperCase() === 'TRUE';
+    const endDate = get('募集終了日') instanceof Date
+      ? Utilities.formatDate(get('募集終了日'), BUSINESS.TZ, 'yyyy-MM-dd')
+      : String(get('募集終了日') || '').slice(0, 10);
+    if (status !== '募集中' || !partnerPublish) return;
+    if (endDate && /^\d{4}-\d{2}-\d{2}$/.test(endDate) && endDate < Utilities.formatDate(new Date(), BUSINESS.TZ, 'yyyy-MM-dd')) return;
+
+    const job = {
+      id: String(get('案件番号') || ''),
+      title: String(get('案件名') || ''),
+      businessType: String(get('事業区分') || ''),
+      jobType: String(get('職種') || ''),
+      employmentType: String(get('雇用形態') || ''),
+      description: String(get('業務内容') || ''),
+      requirements: String(get('応募要件') || ''),
+      mustSkills: String(get('必須スキル') || ''),
+      preferredSkills: String(get('歓迎スキル') || ''),
+      age: String(get('年齢条件') || ''),
+      // 正社員案件に限り、求人条件として給与を表示する。それ以外の案件では返却しない。
+      salary: String(get('雇用形態') || '').includes('正社員') ? formatRegularSalary_(get('報酬（給料）')) : '',
+      rewardAmount: String(get('雇用形態') || '').includes('正社員') ? formatYenAmount_(getVersionKAmountValue_(get)) : '',
+      transport: String(get('交通費') || ''),
+      // 企業・代理店向けの報酬額。内部利益・元請け単価は返却しない。
+      amount: isBusinessBpoRow_(get) ? getPartnerWholesaleText_(get) : '',
+      isBpo: isBusinessBpoRow_(get),
+      wholesaleUnit: isBusinessBpoRow_(get) ? getPartnerWholesaleText_(get) : '',
+      hours: String(get('稼働時間') || ''),
+      schedule: String(get('勤務時間帯') || ''),
+      location: String(get('勤務地') || ''),
+      station: String(get('最寄駅') || ''),
+      remote: String(get('リモート条件') || ''),
+      holidays: String(get('休日') || ''),
+      startDate: formatCellDate_(get('勤務開始日')),
+      endDate: endDate,
+      interview: String(get('面談回数・選考') || ''),
+      documents: String(get('提出書類') || ''),
+      updatedAt: formatCellDate_(get('更新日時'))
+    };
+    if (!job.id) return;
+    if (type && job.businessType !== type) return;
+    if (location && !job.location.toLowerCase().includes(location)) return;
+    if (q && ![job.id,job.title,job.jobType,job.description,job.requirements,job.location,job.employmentType].join(' ').toLowerCase().includes(q)) return;
+    jobs.push(job);
+  });
+  return jobs.sort((a,b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+}
+
+
+/**
+ * 保存求人は企業・代理店単位で共有する。
+ * 保存キーは利用区分＋企業名＋案件番号で構成する。
+ */
+function getBusinessSavedJobs() {
+  const user = assertBusinessUser_();
+  const sh = ensureSheet_(getMaster_(), BUSINESS.SHEET.SAVED, BUSINESS.SAVED_HEADERS);
+  if (sh.getLastRow() < 2) return [];
+  const values = sh.getDataRange().getDisplayValues();
+  const ix = headerMap_(values[0]);
+  const key = businessSaveKey_(user);
+  return values.slice(1)
+    .filter(r => String(r[ix['保存キー']] || '') === key)
+    .map(r => ({
+      id: String(r[ix['案件番号']] || ''),
+      title: String(r[ix['案件名']] || ''),
+      savedAt: String(r[ix['保存日時']] || '')
+    }));
+}
+
+function saveBusinessJob(jobId) {
+  const user = assertBusinessUser_();
+  const job = getBusinessJob(jobId);
+  const sh = ensureSheet_(getMaster_(), BUSINESS.SHEET.SAVED, BUSINESS.SAVED_HEADERS);
+  const key = businessSaveKey_(user);
+  const values = sh.getDataRange().getDisplayValues();
+  const ix = headerMap_(values[0]);
+  const exists = values.slice(1).some(r =>
+    String(r[ix['保存キー']] || '') === key &&
+    String(r[ix['案件番号']] || '') === job.id
+  );
+  if (exists) return { ok: true, saved: true, alreadySaved: true };
+  sh.appendRow([
+    key, user.companyName, user.accountType, job.id, job.title,
+    new Date(), user.email
+  ]);
+  return { ok: true, saved: true };
+}
+
+function removeBusinessSavedJob(jobId) {
+  const user = assertBusinessUser_();
+  const sh = ensureSheet_(getMaster_(), BUSINESS.SHEET.SAVED, BUSINESS.SAVED_HEADERS);
+  if (sh.getLastRow() < 2) return { ok: true, removed: false };
+  const values = sh.getDataRange().getDisplayValues();
+  const ix = headerMap_(values[0]);
+  const key = businessSaveKey_(user);
+  let removed = false;
+  for (let i = values.length - 1; i >= 1; i--) {
+    if (String(values[i][ix['保存キー']] || '') === key &&
+        String(values[i][ix['案件番号']] || '') === String(jobId || '').trim()) {
+      sh.deleteRow(i + 1);
+      removed = true;
+    }
+  }
+  return { ok: true, removed: removed };
+}
+
+function businessSaveKey_(user) {
+  return String(user.accountType || '企業').trim() + '::' +
+    String(user.companyName || '').trim().toLowerCase();
+}
+
+function getBusinessJob(jobId) {
+  const user = assertBusinessUser_();
+  const id = String(jobId || '').trim();
+  const job = listBusinessJobs({}).find(x => x.id === id);
+  if (!job) throw new Error('求人が見つからないか、現在公開されていません。');
+  return job;
+}
+
+function formatCellDate_(v) {
+  if (!v) return '';
+  if (v instanceof Date) return Utilities.formatDate(v, BUSINESS.TZ, 'yyyy-MM-dd');
+  return String(v).slice(0, 10);
+}
+
+function safeFileName_(s) {
+  return String(s || '求人票').replace(/[\\/:*?"<>|#%{}~&]/g, '_').replace(/\s+/g, '_').slice(0, 120);
+}
+
+
+/**
+ * ダウンロード専用の元求人情報を案件管理から取得する。
+ * 求職者向け給与・報酬上限はブラウザへ返さず、サーバー内でのみ処理する。
+ */
+function getBusinessDownloadSource_(jobId) {
+  const user = assertBusinessUser_();
+  const ss = getMaster_();
+  const sh = ss.getSheetByName(BUSINESS.SHEET.JOBS);
+  if (!sh || sh.getLastRow() < 2) throw new Error('案件管理に求人データがありません。');
+  const values = sh.getDataRange().getValues();
+  const headers = values[0].map(String);
+  const ix = headerMap_(headers);
+  const row = values.slice(1).find(r => String(r[ix['案件番号']] || '').trim() === String(jobId || '').trim());
+  if (!row) throw new Error('対象求人が見つかりません。');
+  const get = name => ix[name] == null ? '' : row[ix[name]];
+  const employmentType = String(get('雇用形態') || '');
+  const isRegular = employmentType.includes('正社員');
+  const isBpo = isBusinessBpoRow_(get);
+  const rateRaw = user.commissionRate;
+  const rateNumber = parseCommissionRate_(rateRaw);
+  const rate = rateNumber == null ? null : (rateNumber <= 1 ? rateNumber * 100 : rateNumber);
+  const versionKAmount = parseBusinessAmount_(getVersionKAmountValue_(get));
+  const regularCompanyCap = isRegular && versionKAmount != null
+    ? Math.floor(versionKAmount * rate / 100)
+    : null;
+  return {
+    user: user,
+    salary: formatRegularSalary_(get('報酬（給料）')),
+    transport: String(get('交通費') || ''),
+    partnerWholesaleText: getPartnerWholesaleText_(get),
+    candidateUnit: getAmountUpperLimit_(getPartnerWholesaleText_(get)),
+    wholesaleUnit: getAmountUpperLimit_(getPartnerWholesaleText_(get)),
+    versionKAmount: versionKAmount,
+    regularCompanyCap: regularCompanyCap,
+    commissionRate: rate,
+    isRegular: isRegular,
+    isBpo: isBpo,
+    title: String(get('案件名') || ''),
+    jobId: String(get('案件番号') || '')
+  };
+}
+
+function parseCommissionRate_(value) {
+  if (value === '' || value == null) return null;
+  const raw = String(value).replace(/％|%/g, '').replace(/[，,\s]/g, '').trim();
+  if (!raw || !/^\d+(\.\d+)?$/.test(raw)) return null;
+  const n = Number(raw);
+  if (!isFinite(n) || n < 0 || n > 100) return null;
+  // Google Sheets percentage cells may be returned as 0.3 or displayed as 30%.
+  return n > 0 && n <= 1 && String(value).indexOf('%') < 0 && String(value).indexOf('％') < 0 ? n * 100 : n;
+}
+
+function validateAudienceAmount_(jobId, audience, requestedAmount) {
+  const source = getBusinessDownloadSource_(jobId);
+  const mode = String(audience || '');
+  let cap = null;
+  let label = '';
+  if (source.isBpo && mode === 'jobseeker') {
+    cap = source.candidateUnit;
+    label = '給与（時給）';
+  } else if (source.isBpo && mode === 'business') {
+    cap = source.wholesaleUnit;
+    label = '貴社卸単価';
+  } else if (source.isRegular && mode === 'business') {
+    cap = source.regularCompanyCap;
+    label = '企業報酬';
+  } else {
+    throw new Error('この案件・ダウンロード対象では金額を変更できません。');
+  }
+  if (cap == null) throw new Error('管理者が設定した' + label + 'の上限額を数値として取得できません。案件管理の設定を確認してください。');
+  let amount = parseBusinessAmount_(requestedAmount);
+  if (source.isBpo) {
+    const raw = String(requestedAmount == null ? '' : requestedAmount).trim();
+    const nums = extractAmountNumbers_(raw);
+    if (!raw || !nums.length || nums.some(n => n < 0)) {
+      throw new Error(label + 'を入力してください。例：1,600円〜1,800円');
+    }
+    if (Math.max.apply(null, nums) > cap) {
+      throw new Error('入力した' + label + 'が上限 ' + cap.toLocaleString('ja-JP') + '円 を超えています。');
+    }
+    amount = raw;
+  } else {
+    if (amount == null || amount < 0) throw new Error(label + 'は0以上の数値で入力してください。');
+    if (amount > cap) throw new Error('入力した' + label + 'が上限 ' + cap.toLocaleString('ja-JP') + '円 を超えています。');
+  }
+  return { source: source, amount: amount, amountLabel: label, cap: cap };
+}
+
+function parseBusinessAmount_(value) {
+  if (value === '' || value == null) return null;
+  if (typeof value === 'number' && isFinite(value)) return value;
+  const cleaned = String(value).replace(/[,\s円￥]/g, '').trim();
+  if (!cleaned || !/^\d+(\.\d+)?$/.test(cleaned)) return null;
+  return Number(cleaned);
+}
+
+function validateJobSeekerDownload_(jobId, requestedAmount) {
+  const source = getBusinessDownloadSource_(jobId);
+  if (!source.isBpo && !source.isRegular) {
+    throw new Error('報酬額の個別設定はBPO案件・正社員案件のみ対応しています。');
+  }
+  if (source.cap == null) {
+    throw new Error('管理者が設定した報酬額の上限を数値として取得できません。Version-Kへ確認してください。');
+  }
+  const amount = parseBusinessAmount_(requestedAmount);
+  if (amount == null || amount < 0) throw new Error('報酬額は0以上の数値で入力してください。');
+  if (amount > source.cap) throw new Error('入力した報酬額が管理者設定の上限 ' + source.cap.toLocaleString('ja-JP') + '円 を超えています。');
+  return { source: source, amount: amount };
+}
+
+function buildJobSeekerText_(job, source, amount) {
+  const lines = [
+    '求人票（求職者向け）',
+    '求人名：' + job.title,
+    '職種：' + job.jobType,
+    '雇用形態：' + job.employmentType,
+    '',
+    '【仕事内容】', job.description, '',
+    '【応募条件】', job.requirements,
+    job.mustSkills ? '必須スキル：' + job.mustSkills : '',
+    job.preferredSkills ? '歓迎スキル：' + job.preferredSkills : '',
+    job.age ? '年齢条件：' + job.age : '',
+    '',
+    '【給与・報酬】',
+    source.isBpo && amount != null ? '給与：時給' + amount : (source.salary ? '給与：' + source.salary : ''),
+    source.transport ? '交通費：' + source.transport : '',
+    '※給料・報酬額は内定時に確定。',
+    '金額は税込表示。',
+    '',
+    '【勤務条件】',
+    job.hours ? '稼働時間：' + job.hours : '',
+    job.schedule ? '勤務時間帯：' + job.schedule : '',
+    job.location ? '勤務地：' + job.location : '',
+    job.station ? '最寄駅：' + job.station : '',
+    job.remote ? 'リモート条件：' + job.remote : '',
+    job.holidays ? '休日：' + job.holidays : '',
+    job.startDate ? '勤務開始日：' + job.startDate : '',
+    '',
+    '【選考・提出書類】',
+    job.interview ? '面談回数・選考：' + job.interview : '',
+    job.documents ? '提出書類：' + job.documents : '',
+    '',
+    source.isBpo
+      ? '【ご利用時の案内】求職者へ提出する際は、候補者に提示する時給に合わせて給与欄を調整してご活用ください。'
+      : '【ご利用時の案内】求職者へ提出する際は、掲載内容をご確認のうえ、候補者への求人案内にご活用ください。'
+  ];
+  return lines.filter((line, i) => line !== '' || (i > 0 && lines[i - 1] !== '')).join('\n');
+}
+
+function buildBusinessJobText_(job, source, amount) {
+  const lines = [
+    '求人票（職ブレ-Business-）',
+    '案件番号：' + job.id,
+    '求人名：' + job.title,
+    '事業区分：' + job.businessType,
+    '職種：' + job.jobType,
+    '雇用形態：' + job.employmentType,
+    '',
+    '【仕事内容】', job.description, '',
+    '【応募条件】', job.requirements,
+    job.mustSkills ? '必須スキル：' + job.mustSkills : '',
+    job.preferredSkills ? '歓迎スキル：' + job.preferredSkills : '',
+    job.age ? '年齢条件：' + job.age : '',
+    '',
+    '【提携条件】',
+    source.isRegular && source.salary ? '給与：' + source.salary : '',
+    source.transport ? '交通費：' + source.transport : '',
+    source.isBpo ? '貴社卸単価：' + source.partnerWholesaleText : '',
+    source.isRegular ? '報酬額：' + Number(source.versionKAmount).toLocaleString('ja-JP') + '円' : '',
+    source.isRegular ? '注意：貴社報酬は、上記金額より貴社契約手数料にてお支払いいたします。' : '',
+    '※給料・報酬額は内定時に確定。',
+    '金額は税込表示。',
+    '',
+    '【勤務条件】',
+    job.hours ? '稼働時間：' + job.hours : '',
+    job.schedule ? '勤務時間帯：' + job.schedule : '',
+    job.location ? '勤務地：' + job.location : '',
+    job.station ? '最寄駅：' + job.station : '',
+    job.remote ? 'リモート条件：' + job.remote : '',
+    job.holidays ? '休日：' + job.holidays : '',
+    job.startDate ? '勤務開始日：' + job.startDate : '',
+    '',
+    '【選考・提出書類】',
+    job.interview ? '面談回数・選考：' + job.interview : '',
+    job.documents ? '提出書類：' + job.documents : '',
+    '',
+    '※求人情報は掲載時点の内容です。最新条件はVersion-Kへご確認ください。'
+  ];
+  return lines.filter((line, i) => line !== '' || (i > 0 && lines[i - 1] !== '')).join('\n');
+}
+
+function downloadBusinessJobText(jobId, audience, requestedAmount) {
+  const job = getBusinessJob(jobId);
+  const mode = String(audience || 'business');
+  let text;
+  let suffix;
+  if (mode === 'jobseeker') {
+    const source = getBusinessDownloadSource_(jobId);
+    if (source.isRegular) {
+      text = buildJobSeekerText_(job, source, null);
+    } else if (source.isBpo) {
+      const validated = validateAudienceAmount_(jobId, mode, requestedAmount);
+      text = buildJobSeekerText_(job, validated.source, validated.amount);
+    } else {
+      throw new Error('この案件種別の求職者向けダウンロードには対応していません。');
+    }
+    suffix = '_求職者向け';
+  } else if (mode === 'business') {
+    const source = getBusinessDownloadSource_(jobId);
+    const fixedAmount = source.isBpo ? source.partnerWholesaleText : source.versionKAmount;
+    text = buildBusinessJobText_(job, source, fixedAmount);
+    suffix = '_事業者向け';
+  } else {
+    throw new Error('ダウンロード対象の選択が正しくありません。');
+  }
+  return {
+    fileName: safeFileName_(job.id + '_' + job.title + suffix) + '.txt',
+    mimeType: 'text/plain;charset=utf-8',
+    base64: Utilities.base64Encode(Utilities.newBlob(text, 'text/plain;charset=utf-8').getBytes())
+  };
+}
+
+function downloadBusinessJobPdf(jobId, audience, requestedAmount) {
+  const job = getBusinessJob(jobId);
+  const mode = String(audience || 'business');
+  let source;
+  let amount = null;
+  let suffix;
+  let sections;
+  if (mode === 'jobseeker') {
+    source = getBusinessDownloadSource_(jobId);
+    if (source.isRegular) {
+      // 正社員の求職者向けは給与固定。企業報酬は記載しない。
+    } else if (source.isBpo) {
+      const validated = validateAudienceAmount_(jobId, mode, requestedAmount);
+      source = validated.source;
+      amount = validated.amount;
+    } else {
+      throw new Error('この案件種別の求職者向けダウンロードには対応していません。');
+    }
+    suffix = '_求職者向け';
+    sections = [
+      ['仕事内容', job.description],
+      ['応募条件', [job.requirements, job.mustSkills ? '必須スキル：' + job.mustSkills : '', job.preferredSkills ? '歓迎スキル：' + job.preferredSkills : '', job.age ? '年齢条件：' + job.age : ''].filter(Boolean).join('\n')],
+      ['給与・報酬', [
+        source.isBpo && amount != null ? '給与：時給' + amount : (source.salary ? '給与：' + source.salary : ''),
+        source.transport ? '交通費：' + source.transport : '',
+        '※給料・報酬額は内定時に確定。',
+        '金額は税込表示。'
+      ].filter(Boolean).join('\n')],
+      ['勤務条件', [job.hours ? '稼働時間：' + job.hours : '', job.schedule ? '勤務時間帯：' + job.schedule : '', job.location ? '勤務地：' + job.location : '', job.station ? '最寄駅：' + job.station : '', job.remote ? 'リモート条件：' + job.remote : '', job.holidays ? '休日：' + job.holidays : '', job.startDate ? '勤務開始日：' + job.startDate : ''].filter(Boolean).join('\n')],
+      ['選考・提出書類', [job.interview ? '面談回数・選考：' + job.interview : '', job.documents ? '提出書類：' + job.documents : ''].filter(Boolean).join('\n')],
+      ['ご利用時の案内', source.isBpo
+        ? '求職者へ提出する際は、候補者に提示する時給に合わせて給与欄を調整してご活用ください。'
+        : '求職者へ提出する際は、掲載内容をご確認のうえ、候補者への求人案内にご活用ください。']
+    ];
+  } else if (mode === 'business') {
+    source = getBusinessDownloadSource_(jobId);
+    amount = source.isBpo ? source.partnerWholesaleText : source.versionKAmount;
+    suffix = '_事業者向け';
+    sections = [
+      ['仕事内容', job.description],
+      ['応募条件', [job.requirements, job.mustSkills ? '必須スキル：' + job.mustSkills : '', job.preferredSkills ? '歓迎スキル：' + job.preferredSkills : '', job.age ? '年齢条件：' + job.age : ''].filter(Boolean).join('\n')],
+      ['提携条件', [
+        source.isRegular && source.salary ? '給与：' + source.salary : '',
+        source.transport ? '交通費：' + source.transport : '',
+        source.isBpo ? '貴社卸単価：' + source.partnerWholesaleText : '',
+        source.isRegular ? '報酬額：' + Number(source.versionKAmount).toLocaleString('ja-JP') + '円' : '',
+        source.isRegular ? '注意：貴社報酬は、上記金額より貴社契約手数料にてお支払いいたします。' : '',
+        '※給料・報酬額は内定時に確定。',
+        '金額は税込表示。'
+      ].filter(Boolean).join('\n')],
+      ['勤務条件', [job.hours ? '稼働時間：' + job.hours : '', job.schedule ? '勤務時間帯：' + job.schedule : '', job.location ? '勤務地：' + job.location : '', job.station ? '最寄駅：' + job.station : '', job.remote ? 'リモート条件：' + job.remote : '', job.holidays ? '休日：' + job.holidays : '', job.startDate ? '勤務開始日：' + job.startDate : ''].filter(Boolean).join('\n')],
+      ['選考・提出書類', [job.interview ? '面談回数・選考：' + job.interview : '', job.documents ? '提出書類：' + job.documents : ''].filter(Boolean).join('\n')]
+    ];
+  } else {
+    throw new Error('ダウンロード対象の選択が正しくありません。');
+  }
+
+  const folderId = PropertiesService.getScriptProperties().getProperty(BUSINESS.PROP.PDF_FOLDER_ID)
+    || BUSINESS.PDF_FOLDER_ID_FROM_JOBBURE;
+  const folder = DriveApp.getFolderById(folderId);
+  const doc = DocumentApp.create('一時生成_' + safeFileName_(job.id + '_' + job.title + suffix));
+  const body = doc.getBody();
+  body.clear();
+  const title = body.appendParagraph(job.title || '求人票');
+  title.setHeading(DocumentApp.ParagraphHeading.TITLE);
+  title.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  body.appendParagraph('案件番号：' + job.id);
+  body.appendParagraph('事業区分：' + job.businessType);
+  body.appendHorizontalRule();
+  sections.forEach(section => {
+    body.appendParagraph(section[0]).setHeading(DocumentApp.ParagraphHeading.HEADING2);
+    body.appendParagraph(section[1] || '記載なし');
+  });
+  body.appendParagraph('※求人情報は掲載時点の内容です。最新条件はVersion-Kへご確認ください。');
+  doc.saveAndClose();
+
+  const docFile = DriveApp.getFileById(doc.getId());
+  const pdfBlob = docFile.getAs(MimeType.PDF).setName(safeFileName_(job.id + '_' + job.title + suffix) + '.pdf');
+  const pdfFile = folder.createFile(pdfBlob);
+  docFile.setTrashed(true);
+  return {
+    ok: true,
+    fileName: pdfFile.getName(),
+    url: pdfFile.getUrl(),
+    downloadUrl: 'https://drive.google.com/uc?export=download&id=' + pdfFile.getId()
+  };
+}
+
+/**
+ * 問い合わせを職ブレと同じスプレッドシート内に保存する。
+ * 企業・代理店側の入力内容はHTML側で送信前に検証し、サーバー側でも再検証する。
+ */
+function submitBusinessInquiry(payload) {
+  const user = assertBusinessUser_();
+  payload = payload || {};
+  const job = getBusinessJob(payload.jobId);
+  const contact = String(payload.contactName || '').trim();
+  const phone = String(payload.phone || '').trim();
+  const message = String(payload.message || '').trim();
+  if (!contact) throw new Error('担当者名を入力してください。');
+  if (!message) throw new Error('問い合わせ内容を入力してください。');
+
+  const sh = ensureSheet_(getMaster_(), BUSINESS.SHEET.INQUIRIES, BUSINESS.INQUIRY_HEADERS);
+  const id = 'BIZ-' + Utilities.getUuid().replace(/-/g, '').slice(0, 10).toUpperCase();
+  sh.appendRow([
+    id, new Date(), job.id, job.title, user.companyName, contact,
+    user.email, phone, message, '未対応'
+  ]);
+  return { ok: true, inquiryId: id, message: 'Version-Kへの問い合わせを受け付けました。' };
+}
+
+/** 管理者用：接続先と利用者数の確認 */
+function getBusinessAdminStatus() {
+  const admin = String(Session.getActiveUser().getEmail() || '').trim().toLowerCase();
+  const adminProps = PropertiesService.getScriptProperties();
+  const allow = String(
+    adminProps.getProperty(BUSINESS.PROP.ADMIN_EMAILS) ||
+    adminProps.getProperty(BUSINESS.PROP.ADMIN_EMAIL) || ''
+  ).split(/[;,\n]/).map(x => x.trim().toLowerCase()).filter(Boolean);
+  if (!admin || !allow.includes(admin)) throw new Error('管理者権限がありません。');
+  const ss = getMaster_();
+  const accounts = ss.getSheetByName(BUSINESS.SHEET.ACCOUNTS);
+  const inquiries = ss.getSheetByName(BUSINESS.SHEET.INQUIRIES);
+  return {
+    spreadsheetName: ss.getName(),
+    accountCount: accounts ? Math.max(0, accounts.getLastRow() - 1) : 0,
+    inquiryCount: inquiries ? Math.max(0, inquiries.getLastRow() - 1) : 0
+  };
+}
