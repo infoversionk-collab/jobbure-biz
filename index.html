@@ -139,6 +139,63 @@
       .site-footer{padding:20px;gap:15px;flex-wrap:wrap}.site-footer>span{order:3;width:100%}
     }
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+  
+    /* ===== 高視認性・NEON FUTURE OVERRIDE ===== */
+    :root{--ink:#F7FAFF;--muted:#C2CDE2;--line:rgba(174,198,255,.22)}
+    body.landing{color:#F7FAFF}
+    body.landing h1,body.landing h2,body.landing h3,body.landing strong{color:#F5F8FF}
+    .hero h1{color:#F7FAFF!important;text-shadow:0 5px 28px rgba(0,0,0,.48)}
+    .hero h1 .gradient-text{
+      background:linear-gradient(100deg,#A9BCFF 0%,#70E4F2 48%,#C0A8FF 100%);
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 4px 16px rgba(91,170,255,.2))
+    }
+    .hero-lead{color:#D0DBEE!important;text-shadow:0 2px 12px rgba(0,0,0,.3)}
+    .hero-note{color:#C1CDE2!important}
+    .eyebrow{color:#AFC4FF!important}
+    .section-heading h2,.flow-panel h2,.closing h2{
+      color:#F7FAFF!important;text-shadow:0 3px 22px rgba(76,133,255,.2)
+    }
+    .section-heading p,.flow-panel p,.closing p{color:#C3D0E5!important}
+    .feature-card{
+      background:linear-gradient(145deg,rgba(28,47,82,.97),rgba(13,23,46,.98));
+      border-color:rgba(130,165,255,.3);
+      box-shadow:0 16px 42px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.07)
+    }
+    .feature-card h3{color:#F5F8FF!important}
+    .feature-card p{color:#C6D2E7!important}
+    .feature-number{color:rgba(150,180,255,.16)!important}
+    .flow-panel{
+      background:linear-gradient(120deg,rgba(25,48,87,.99),rgba(15,28,57,.99) 62%,rgba(35,42,91,.99));
+      border-color:rgba(135,167,255,.34)
+    }
+    .flow-step strong{color:#F5F8FF!important}
+    .flow-step small{color:#C3D0E5!important}
+    .closing-inner{
+      background:radial-gradient(ellipse at 50% 0%,rgba(83,122,255,.34),transparent 68%),
+      linear-gradient(135deg,#17294B 0%,#101D39 55%,#1A2450 100%);
+      border-color:rgba(135,167,255,.42);
+      box-shadow:0 25px 70px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.08)
+    }
+    .closing h2{
+      background:linear-gradient(100deg,#FFFFFF 0%,#C8E9FF 48%,#D1C1FF 100%);
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent
+    }
+    .trust-strip{color:#B4C3DE!important;border-color:rgba(174,198,255,.2)}
+    .site-footer{color:#AAB9D4!important;border-color:rgba(174,198,255,.22)}
+    .site-footer>a:last-child,.text-link{color:#E0E9FA!important}
+    .header-nav{color:#D1DDF2!important}
+    .floating-tag{color:#F3F7FF;border-color:rgba(150,177,255,.32);background:rgba(19,32,60,.97)}
+    .dash-title,.dash-job b,.dash-bottom b{color:#F5F8FF!important}
+    .dash-subtitle,.dash-stats small,.dash-job small,.dash-bottom{color:#B8C7E0!important}
+    .dash-stats>div{background:rgba(255,255,255,.065);border-color:rgba(174,198,255,.24)}
+    .button-outline{color:#F7FAFF!important;border-color:rgba(166,190,255,.42)}
+    @media(max-width:680px){
+      .hero h1{color:#F7FAFF!important}
+      .hero-lead{color:#D0DBEE!important}
+      .closing-inner{padding-inline:20px}
+    }
+
   </style>
 </head>
 <body class="landing">
