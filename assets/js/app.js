@@ -16,7 +16,26 @@ document.addEventListener("DOMContentLoaded", () => {
     el.textContent=message; el.className="app-notice"+(error?" error":"");
     el.hidden=false;
   };
-  const request = (action,payload={}) => ShokubureAPI.request(action,payload);
+  const REQUEST_TIMEOUT_MS = 35000;
+  const request = async (action,payload={}) => {
+    if (!window.ShokubureAPI || typeof ShokubureAPI.request !== "function") {
+      throw new Error("API接続設定を読み込めません。config.js・api.js・app.jsの読み込み順を確認してください。");
+    }
+    let timer;
+    try {
+      return await Promise.race([
+        ShokubureAPI.request(action,payload),
+        new Promise((_,reject) => {
+          timer = window.setTimeout(
+            () => reject(new Error("GASとの通信が35秒以内に完了しませんでした。Networkで通信状態を確認してください。")),
+            REQUEST_TIMEOUT_MS
+          );
+        })
+      ]);
+    } finally {
+      if (timer) window.clearTimeout(timer);
+    }
+  };
   const money = (v, fallback="条件確認") => String(v == null || v === "" ? fallback : v);
 
   if (!document.getElementById("recruiting-company-style")) {
@@ -101,7 +120,13 @@ document.addEventListener("DOMContentLoaded", () => {
     STATE.savedJobs=await request("getBusinessSavedJobs")||[];
     const missing=STATE.savedJobs.filter(s=>!STATE.jobs.some(j=>String(j.id)===String(s.id)));
     for(const s of missing){
-      try{const j=await request("getBusinessJob",{jobId:s.id});if(j)STATE.jobs.push(j);}catch(_e){}
+      try {
+        const j=await request("getBusinessJob",{jobId:s.id});
+        if(j) STATE.jobs.push(j);
+      } catch(error) {
+        // 保存求人の詳細取得失敗は一覧表示全体を止めない。
+        console.warn("保存求人の詳細取得に失敗:", s.id, error);
+      }
     }
     renderJobs();
   }
@@ -311,7 +336,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setupAdminNavigation(me);
 
-      await loadSavedJobs();
+      try {
+        await loadSavedJobs();
+      } catch (savedError) {
+        console.warn("保存求人の取得に失敗:", savedError);
+        STATE.savedJobs = [];
+      }
       await loadJobs();
     }catch(e){
       $("job-list").innerHTML=`<div class="empty-state"><b>ログイン・利用権限を確認できません</b><p>${esc(e.message)}</p></div>`;
