@@ -244,6 +244,15 @@ document.addEventListener("DOMContentLoaded", () => {
       $("user-company").textContent=me.companyName||"パートナー";
       $("user-email").textContent=me.email||"";
       $("user-avatar").textContent=(me.companyName||"P").slice(0,1);
+
+      // 管理画面リンクは指定管理者アカウントだけに表示する。
+      const adminLink = $("admin-nav-link");
+      if (adminLink) {
+        const signedInEmail = String(me.email || "").trim().toLowerCase();
+        const isDesignatedAdmin = signedInEmail === "yama.78.ken3@gmail.com";
+        adminLink.hidden = !isDesignatedAdmin;
+      }
+
       await loadSavedJobs();
       await loadJobs();
     }catch(e){
