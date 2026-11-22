@@ -1,241 +1,511 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080d1b">
-  <meta name="description" content="職ブレ-Business-｜求人とパートナーをつなぐビジネスプラットフォーム">
-  <title>職ブレ-Business-｜求人とパートナーをつなぐ</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <title>職ブレ-Business-</title>
   <style>
-    :root{
-      --ink:#f7f9ff;--muted:#aab5cb;--navy:#080d1b;--navy2:#101a31;
-      --line:rgba(255,255,255,.11);--blue:#6687ff;--cyan:#62d7ef;
-      --violet:#9a79ff;--mint:#72e3c0;--panel:rgba(255,255,255,.055);
-      --shadow:0 30px 90px rgba(0,0,0,.35)
-    }
-    *{box-sizing:border-box}
-    /* 既存style.cssの .landing{overflow:hidden} を上書きし、縦スクロールを有効化 */
-    body.landing { overflow-y: auto !important; height: auto !important; min-height: 100vh; }
-    html { overflow-y: auto !important; }
 
-    html{scroll-behavior:smooth;scroll-padding-top:90px}
-    html{height:auto;min-height:100%;overflow-y:auto!important} body.landing{margin:0;min-height:100vh;height:auto;overflow-x:hidden!important;overflow-y:auto!important;background:var(--navy);color:var(--ink);font-family:"DM Sans","Noto Sans JP",sans-serif} body.landing main{display:block}
-    body.landing a{color:inherit;text-decoration:none}
-    body.landing button{font:inherit}
-    .ambient{position:absolute;pointer-events:none;filter:blur(90px);opacity:.25;border-radius:50%;z-index:0}
-    .ambient-one{width:520px;height:520px;background:#3458ff;top:50px;right:-180px}
-    .ambient-two{width:460px;height:460px;background:#7b4be8;top:680px;left:-240px;opacity:.14}
-    .site-header{height:82px;max-width:1240px;padding:0 28px;margin:auto;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10;border-bottom:1px solid rgba(255,255,255,.07)}
-    .brand{display:flex;align-items:center;gap:11px}
-    .brand-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#7893ff,#5548d9);font-weight:900;font-size:22px;box-shadow:0 8px 24px #5369ff55}
-    .brand-word{font-size:19px;font-weight:900;letter-spacing:.02em;line-height:1.05}
-    .brand-sub{display:block;font-size:8px;letter-spacing:.24em;color:#9eacc9;margin-top:5px}
-    .header-nav{display:flex;align-items:center;gap:34px;color:#b8c3d8;font-size:12px;font-weight:700}
-    .header-nav>a:not(.button):hover,.text-link:hover{color:#fff}
-    .button{display:inline-flex;align-items:center;justify-content:center;gap:16px;border-radius:9px;font-size:12px;font-weight:800;transition:transform .2s,box-shadow .2s,border-color .2s}
-    .button:hover{transform:translateY(-2px)}
-    .button-small{padding:12px 18px}
-    .button-large{padding:17px 23px;min-height:54px}
-    .button-primary{color:#fff!important;background:linear-gradient(105deg,#6687ff,#7757e9);box-shadow:0 12px 30px #5d6fff40}
-    .button-primary:hover{box-shadow:0 16px 38px #5d6fff66}
-    .button-outline{border:1px solid rgba(255,255,255,.2);color:#f4f6ff!important;background:rgba(255,255,255,.035)}
-    .button-outline:hover{border-color:#8ca2ff;background:rgba(255,255,255,.08)}
-    .menu-toggle{display:none;background:none;border:0;color:white;font-size:22px}
-    .section-wrap{width:min(1120px,calc(100% - 48px));margin-inline:auto;position:relative;z-index:1}
-    .hero{min-height:650px;padding:105px 0 82px;display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:56px}
-    .eyebrow{display:flex;align-items:center;gap:10px;color:#91a6d9;font-size:9px;letter-spacing:.22em;font-weight:900}
-    .eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 14px var(--mint)}
-    .hero h1{font-size:clamp(38px,5vw,62px);line-height:1.32;letter-spacing:-.055em;margin:25px 0 22px;font-weight:900}
-    .gradient-text{background:linear-gradient(100deg,#83a0ff 5%,#72d8ed 55%,#a88bff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-    .hero-lead{font-size:14px;line-height:2.15;color:#aab6cc;letter-spacing:.015em}
-    .hero-actions{display:flex;align-items:center;gap:27px;margin-top:32px}
-    .text-link{font-size:11px;font-weight:800;color:#c5cee0}
-    .hero-note{margin-top:27px;color:#8795af;font-size:10px;letter-spacing:.04em}
-    .secure-icon{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#193e3c;color:#77e0c1;font-weight:900;margin-right:7px}
-    .hero-art{position:relative;min-height:430px;display:grid;place-items:center}
-    .orbit{position:absolute;border:1px solid rgba(135,158,255,.16);border-radius:50%;transform:rotate(-24deg)}
-    .orbit-a{width:510px;height:330px}.orbit-b{width:430px;height:470px;transform:rotate(35deg)}
-    .dashboard-card{width:min(100%,440px);position:relative;z-index:2;padding:24px;border-radius:17px;background:linear-gradient(145deg,rgba(27,42,75,.98),rgba(12,21,41,.98));border:1px solid rgba(164,184,255,.24);box-shadow:0 35px 90px #0008,0 0 60px #657eff20;transform:rotate(-2deg)}
-    .dash-top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:17px}
-    .dash-brand{font-size:11px;font-weight:900;letter-spacing:.14em}.dash-brand i{display:inline-block;width:7px;height:7px;background:#73e0c1;border-radius:50%;margin-right:8px}
-    .dash-brand small{display:block;color:#8291ad;font-size:7px;letter-spacing:.25em;margin:4px 0 0 16px}
-    .dash-pill{font-size:7px;letter-spacing:.12em;color:#9db2ff;border:1px solid #536aa4;border-radius:30px;padding:7px 9px}
-    .dash-title{font-size:19px;font-weight:900;margin-top:22px}.dash-subtitle{font-size:10px;color:#8d9db9;margin-top:5px}
-    .dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:21px 0}
-    .dash-stats>div{padding:13px;border:1px solid var(--line);border-radius:9px;background:#ffffff08}
-    .dash-stats small,.dash-job small{display:block;color:#8d9db9;font-size:8px}
-    .dash-stats strong{display:block;font-size:13px;margin-top:7px}
-    .dash-job{display:flex;align-items:center;gap:12px;padding:13px 10px;border-top:1px solid var(--line)}
-    .job-symbol{width:35px;height:35px;border-radius:9px;display:grid;place-items:center;background:#244d81;color:#8bdcf4;font-size:10px;font-weight:900}
-    .job-symbol.purple{background:#3c2d70;color:#c3aaff}
-    .dash-job b{font-size:10px}.dash-job small{margin-top:5px}
-    .job-arrow{margin-left:auto;color:#9eb1ff}
-    .dash-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:16px;margin-top:8px;font-size:8px;color:#8c9ab4;letter-spacing:.08em}
-    .dash-bottom i{display:inline-block;width:6px;height:6px;background:#70dfbd;border-radius:50%;margin-right:6px}
-    .dash-bottom b{color:#d7def0;font-size:9px}
-    .floating-tag{position:absolute;z-index:3;padding:12px 16px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:rgba(20,31,56,.88);box-shadow:var(--shadow);font-size:9px;font-weight:800;color:#dce4f7;backdrop-filter:blur(12px)}
-    .floating-tag span{color:#8ca5ff;margin-right:7px}.tag-top{top:40px;right:-4px}.tag-bottom{bottom:40px;left:-14px}
-    .trust-strip{display:flex;justify-content:space-between;align-items:center;padding:22px 27px;border-block:1px solid rgba(255,255,255,.08);color:#7f8eaa;font-size:8px;font-weight:900;letter-spacing:.19em}
-    .trust-strip i{width:4px;height:4px;background:#6479b4;border-radius:50%}
-    .features-section{padding:115px 0 105px}
-    .section-heading{text-align:center}.section-heading .eyebrow{justify-content:center}
-    .section-heading h2{font-size:clamp(27px,3.5vw,40px);line-height:1.5;letter-spacing:-.04em;margin:20px 0 12px}
-    .section-heading p{font-size:12px;color:#93a1ba}
-    .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
-    .feature-card{position:relative;overflow:hidden;min-height:220px;padding:29px 27px;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025));transition:transform .25s,border-color .25s}
-    .feature-card:hover{transform:translateY(-5px);border-color:rgba(130,157,255,.5)}
-    .feature-icon{width:43px;height:43px;border-radius:12px;display:grid;place-items:center;font-size:23px;margin-bottom:25px}
-    .feature-icon.blue{background:#1c3761;color:#8db5ff}.feature-icon.violet{background:#382c65;color:#c1a5ff}.feature-icon.mint{background:#183f42;color:#83e5d0}
-    .feature-card h3{font-size:15px;margin:0 0 10px}.feature-card p{font-size:10px;line-height:1.9;color:#9aa8c0;max-width:270px}
-    .feature-number{position:absolute;right:23px;bottom:17px;font-size:34px;font-weight:900;color:#ffffff0b}
-    .flow-section{padding:0 0 110px}
-    .flow-panel{display:grid;grid-template-columns:.9fr 1.1fr;gap:65px;padding:52px 56px;border:1px solid rgba(255,255,255,.11);border-radius:16px;background:linear-gradient(120deg,#142440,#111a31 65%,#1a2450);box-shadow:var(--shadow)}
-    .flow-panel h2{font-size:29px;line-height:1.5;margin:18px 0 13px;letter-spacing:-.04em}
-    .flow-panel p{font-size:11px;color:#9eacc4;line-height:2}
-    .flow-steps{display:flex;flex-direction:column;justify-content:center}
-    .flow-step{display:flex;align-items:center;gap:19px;padding:17px 0;border-bottom:1px solid rgba(255,255,255,.1)}
-    .flow-step:last-child{border:0}
-    .flow-step>b{font-size:21px;color:#7f9bff;font-weight:900}
-    .flow-step strong{display:block;font-size:13px}.flow-step small{display:block;color:#94a3bd;font-size:9px;margin-top:6px}
-    .closing{padding-bottom:90px}
-    .closing-inner{text-align:center;padding:68px 25px;border:1px solid rgba(139,160,255,.2);border-radius:17px;background:radial-gradient(ellipse at 50% 0%,#364c8a55,transparent 65%),linear-gradient(135deg,#121e38,#0d1528)}
-    .closing-inner .eyebrow{justify-content:center}
-    .closing h2{font-size:clamp(27px,3.5vw,39px);line-height:1.55;letter-spacing:-.04em;margin:19px 0 12px}
-    .closing p{font-size:11px;color:#9caac2;margin-bottom:27px}
-    .site-footer{max-width:1240px;margin:auto;padding:24px 28px 30px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;color:#7786a2;font-size:9px}
-    .site-footer .brand-mark{width:32px;height:32px;font-size:17px;border-radius:10px}.site-footer .brand-word{font-size:15px}.site-footer .brand-sub{font-size:7px}
-    .site-footer>a:last-child{color:#aab8d1;font-weight:700}
-    .mobile-only{display:none}
-    @media(max-width:900px){
-      .hero{gap:25px;grid-template-columns:1fr 1fr;padding-top:80px}
-      .hero h1{font-size:clamp(34px,5vw,48px)}
-      .hero-art{min-height:390px}.dashboard-card{padding:19px}.floating-tag{font-size:8px}
-      .flow-panel{gap:35px;padding:42px}
-    }
-    @media(max-width:680px){
-      .site-header{height:70px;padding:0 20px}.header-nav{display:none;position:absolute;top:69px;left:0;right:0;padding:18px 22px 22px;background:#101a30;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;gap:18px}
-      .header-nav.is-open{display:flex}.header-nav .button{width:100%}.menu-toggle{display:block}
-      .section-wrap{width:calc(100% - 38px)}
-      .hero{display:flex;flex-direction:column;align-items:stretch;gap:32px;padding:76px 0 58px;min-height:auto}
-      .hero h1{font-size:clamp(35px,9vw,48px);margin:21px 0 16px}
-      .hero-lead{font-size:12px;line-height:2}
-      .hero-actions{gap:18px;flex-wrap:wrap;margin-top:25px}.button-large{min-height:50px;padding:15px 18px;font-size:11px}
-      .hero-art{min-height:350px;margin:0 -4px}.dashboard-card{width:92%;padding:17px;transform:rotate(-1deg)}
-      .orbit-a{width:340px;height:260px}.orbit-b{width:290px;height:340px}
-      .tag-top{right:-1px;top:9px}.tag-bottom{left:-2px;bottom:7px}
-      .trust-strip{gap:12px;justify-content:center;flex-wrap:wrap;padding:18px 8px;font-size:7px;letter-spacing:.12em}
-      .trust-strip i{margin:0 2px}
-      .features-section{padding:78px 0 70px}.section-heading h2{font-size:27px}.section-heading p{font-size:10px;line-height:1.8}
-      .mobile-only{display:block}
-      .feature-grid{grid-template-columns:1fr;gap:11px;margin-top:30px}
-      .feature-card{min-height:0;padding:22px}.feature-icon{margin-bottom:16px;width:39px;height:39px}.feature-card p{font-size:10px}
-      .flow-section{padding-bottom:72px}.flow-panel{grid-template-columns:1fr;gap:20px;padding:29px 23px}
-      .flow-panel h2{font-size:25px}.flow-step{padding:14px 0}
-      .closing{padding-bottom:60px}.closing-inner{padding:48px 18px}.closing h2{font-size:26px}.closing p{line-height:1.8}
-      .site-footer{padding:20px;gap:15px;flex-wrap:wrap}.site-footer>span{order:3;width:100%}
-    }
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+:root{
+  color-scheme:dark;
+  --bg:#07111f;
+  --surface:#101f33;
+  --surface-2:#162941;
+  --surface-3:#1c3450;
+  --text:#f4f8ff;
+  --text-soft:#d5e2f2;
+  --muted:#b0c2d8;
+  --line:#35506d;
+  --blue:#39a7ff;
+  --blue-2:#176fce;
+  --cyan:#50e3e6;
+  --green:#38d69a;
+  --red:#ff7b87;
+  --shadow:0 18px 50px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{
+  margin:0;min-height:100vh;
+  background:
+    radial-gradient(ellipse at 12% 0%,rgba(29,119,190,.22),transparent 36%),
+    radial-gradient(ellipse at 92% 12%,rgba(57,167,255,.14),transparent 32%),
+    linear-gradient(145deg,#07111f 0%,#0a1728 48%,#0b1c30 100%);
+  color:var(--text);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+  font-size:15px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+header{
+  position:relative;overflow:hidden;
+  background:linear-gradient(110deg,rgba(12,31,53,.98),rgba(15,49,78,.96));
+  border-bottom:1px solid rgba(80,227,230,.28);
+  color:#fff;padding:22px 24px;
+  box-shadow:0 8px 32px rgba(0,0,0,.22);
+}
+header:after{
+  content:"";position:absolute;right:-80px;top:-150px;width:360px;height:260px;
+  border:1px solid rgba(80,227,230,.18);border-radius:50%;
+  box-shadow:0 0 0 28px rgba(80,227,230,.025),0 0 0 58px rgba(80,227,230,.02);
+  pointer-events:none;
+}
+header .inner{position:relative;z-index:1;max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:16px}
+header h1{font-size:clamp(22px,3vw,28px);letter-spacing:.04em;margin:0;font-weight:850;color:#fff;text-shadow:0 0 24px rgba(57,167,255,.25)}
+header small{display:block;margin-top:4px;color:#d9eaff;font-size:13px;letter-spacing:.04em}
+#userInfo{color:#e7f5ff!important;font-size:13px;font-weight:650}
+.wrap{max-width:1180px;margin:30px auto;padding:0 20px 48px}
+.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:12px;margin-bottom:20px}
+.tabs{display:flex;gap:10px;margin:0 0 18px;flex-wrap:wrap}
+input,select,textarea{
+  width:100%;min-height:46px;padding:12px 14px;
+  border:1px solid #49627d;border-radius:11px;
+  background:#0d1b2c;color:#f5f9ff;font:inherit;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.18);
+  transition:border-color .18s,box-shadow .18s,background .18s;
+}
+input::placeholder,textarea::placeholder{color:#9db0c7;opacity:1}
+select option{background:#102138;color:#fff}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--cyan);
+  box-shadow:0 0 0 3px rgba(80,227,230,.15);
+  background:#10243a;
+}
+textarea{min-height:120px;resize:vertical}
+button{
+  border:1px solid rgba(115,208,255,.4);border-radius:11px;
+  padding:12px 17px;
+  background:linear-gradient(135deg,#1689e8,#245fc4);
+  color:#fff;font:inherit;font-weight:750;letter-spacing:.015em;
+  cursor:pointer;box-shadow:0 7px 18px rgba(20,112,204,.2);
+  transition:transform .18s,filter .18s,box-shadow .18s;
+}
+button:hover{filter:brightness(1.13);transform:translateY(-1px);box-shadow:0 10px 24px rgba(20,112,204,.28)}
+button:active{transform:translateY(0)}
+button.secondary{background:#203750;color:#e8f3ff;border:1px solid #496580;box-shadow:none}
+button.secondary:hover{background:#2a4867}
+button.active{background:linear-gradient(135deg,#1689e8,#245fc4)!important;color:#fff!important;border-color:#5cc8ff!important}
+button:disabled{opacity:.55;cursor:wait;transform:none}
+.muted{color:var(--muted);font-size:13px;line-height:1.6}
+.notice{
+  padding:14px 17px;border-radius:12px;
+  background:#122e49;color:#e6f5ff;
+  border:1px solid #2d6289;margin-bottom:18px;font-size:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+}
+.notice.error{background:#3a1d2b;color:#ffe3e7;border-color:#a94d65}
+.notice.success{background:#10372f;color:#d8fff0;border-color:#27866c}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.card{
+  position:relative;overflow:hidden;
+  background:linear-gradient(155deg,rgba(22,43,67,.98),rgba(13,29,48,.98));
+  border:1px solid #2c4967;border-radius:17px;padding:20px;
+  box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;
+  transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+.card:before{
+  content:"";position:absolute;left:0;top:0;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--blue),transparent);opacity:.7;
+}
+.card:hover{transform:translateY(-3px);border-color:#4c91c0;box-shadow:0 22px 55px rgba(0,0,0,.36)}
+.card h3{font-size:18px;margin:0;line-height:1.55;color:#fff;font-weight:800;letter-spacing:.01em}
+.tags{display:flex;flex-wrap:wrap;gap:7px}
+.tag{
+  font-size:12px;font-weight:700;letter-spacing:.02em;
+  padding:5px 10px;border-radius:999px;
+  background:#1b3d5a;color:#d9f5ff;border:1px solid #356586;
+}
+.amount{font-size:21px;font-weight:850;color:#6ee7f2;line-height:1.4}
+.card-actions{display:flex;gap:9px;margin-top:auto;flex-wrap:wrap}
+.card-actions button{flex:1;min-width:110px;font-size:13px;padding:10px 12px}
+.empty{
+  background:#102138;border:1px dashed #54718e;border-radius:14px;
+  padding:46px 24px;text-align:center;color:#d3e2f2;font-size:15px;
+}
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(2,8,16,.82);
+  backdrop-filter:blur(8px);display:none;align-items:flex-start;
+  justify-content:center;padding:20px;overflow:auto;z-index:10;
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  background:linear-gradient(155deg,#142942,#0c1b2d);
+  color:var(--text);border:1px solid #3c5d7b;
+  border-radius:19px;width:min(780px,100%);padding:25px;
+  margin:auto;box-shadow:0 28px 90px rgba(0,0,0,.55);
+}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.modal-head h2{font-size:21px;margin:0;color:#fff;letter-spacing:.02em}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.detail-item{
+  background:#1a314b;border:1px solid #35516e;
+  padding:14px;border-radius:11px;color:#f4f8ff;
+}
+.detail-item .muted{color:#b9cce0}
+.detail-item b{display:block;margin-top:6px;white-space:pre-wrap;color:#fff;font-size:15px;line-height:1.6}
+.section{margin-top:20px;padding-top:15px;border-top:1px solid #2d4863}
+.section h4{margin:0 0 8px;color:#72dce9;font-size:15px}
+.section p{white-space:pre-wrap;line-height:1.85;margin:0;color:#edf4fc;font-size:14px}
+.compensation-panel{
+  margin:18px 0;padding:16px;border:1px solid #3c6c8a;
+  border-radius:14px;background:linear-gradient(130deg,#12334c,#172b47);
+}
+.compensation-panel h3{margin:0 0 8px;color:#7ce8ef;font-size:17px}
+.compensation-note{color:#d4e4f4;font-size:13px;line-height:1.7;margin:8px 0 0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field label{display:block;font-size:13px;font-weight:750;margin-bottom:7px;color:#e4f1ff}
+.field.full{grid-column:1/-1}
+#app{display:none}
+@media(max-width:850px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .toolbar{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  header{padding:18px 16px}
+  header .inner{align-items:flex-start;flex-direction:column;gap:8px}
+  header small{font-size:12px}
+  .wrap{padding:0 13px 36px;margin:20px auto}
+  .grid{grid-template-columns:1fr}
+  .toolbar{grid-template-columns:1fr}
+  .detail-grid,.form-grid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}
+  .modal{padding:18px;border-radius:15px}
+  .modal-backdrop{padding:10px}
+  .modal-head h2{font-size:18px}
+  .card{padding:18px}
+  .card-actions button{min-width:0}
+}
+
   </style>
 </head>
-<body class="landing">
-  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="職ブレ-Business- ホーム">
-      <span class="brand-mark">職</span><span class="brand-word">職ブレ<span class="brand-sub">BUSINESS</span></span>
-    </a>
-    <nav class="header-nav" id="header-nav">
-      <a href="#features">特徴</a><a href="#flow">ご利用の流れ</a>
-      <a class="button button-outline button-small" href="login.html">ログイン <span>↗</span></a>
-    </nav>
-    <button class="menu-toggle" id="menu-toggle" aria-label="メニュー" aria-expanded="false">☰</button>
-  </header>
+<body>
+<header>
+  <div class="inner">
+    <div><h1>職ブレ-Business-</h1><small>企業・個人代理店向け 求人情報プラットフォーム</small></div>
+    <div id="userInfo" class="muted" style="color:#d5e2f2">認証確認中...</div>
+  </div>
+</header>
 
-  <main>
-    <section class="hero section-wrap">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-dot"></span> BUSINESS PARTNER PLATFORM</div>
-        <h1>人と仕事の可能性を、<br><span class="gradient-text">もっとスムーズに。</span></h1>
-        <p class="hero-lead">求人情報の確認から、パートナーとの連携まで。<br>採用・人材紹介の現場をつなぐ、ビジネスプラットフォーム。</p>
-        <div class="hero-actions">
-          <a class="button button-primary button-large" href="login.html">職ブレにログイン <span>→</span></a>
-          <a class="text-link" href="#features">サービスを見る <span>↓</span></a>
-        </div>
-        <div class="hero-note"><span class="secure-icon">✓</span> 登録済みの企業・人材紹介パートナー専用</div>
-      </div>
-      <div class="hero-art" aria-label="職ブレのダッシュボードイメージ">
-        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
-        <div class="dashboard-card">
-          <div class="dash-top"><div class="dash-brand"><i></i> SHOKUBURE <small>BUSINESS</small></div><span class="dash-pill">PARTNER PORTAL</span></div>
-          <div class="dash-title">求人ダッシュボード</div>
-          <div class="dash-subtitle">パートナー向け案件一覧</div>
-          <div class="dash-stats">
-            <div><small>公開中の求人</small><strong>案件を検索</strong></div>
-            <div><small>パートナー機能</small><strong>一元管理</strong></div>
-          </div>
-          <div class="dash-job"><span class="job-symbol">IT</span><div><b>IT・DX関連案件</b><small>条件に合う求人をチェック</small></div><span class="job-arrow">↗</span></div>
-          <div class="dash-job"><span class="job-symbol purple">HR</span><div><b>人材紹介案件</b><small>詳細確認・保存・問い合わせ</small></div><span class="job-arrow">↗</span></div>
-          <div class="dash-bottom"><span><i></i> PARTNER ACCESS</span><b>職ブレ-Business-</b></div>
-        </div>
-        <div class="floating-tag tag-top"><span>✦</span> 求人情報を一元管理</div>
-        <div class="floating-tag tag-bottom"><span>↗</span> パートナー連携を加速</div>
-      </div>
-    </section>
+<main class="wrap">
+  <div id="notice" class="notice">ログイン状態を確認しています。</div>
+  <section id="app">
+    <div class="tabs"><button id="allTab" class="active" onclick="switchTab('all')">求人一覧</button><button id="savedTab" class="secondary" onclick="switchTab('saved')">保存した求人</button></div>
+    <div class="toolbar" id="searchToolbar">
+      <input id="q" placeholder="求人名・職種・キーワードで検索">
+      <select id="businessType"><option value="">すべての事業区分</option><option value="BPO">BPO</option><option value="人材紹介">人材紹介</option></select>
+      <input id="location" placeholder="勤務地で絞り込み">
+      <button onclick="loadJobs()">検索</button>
+    </div>
+    <div class="muted" id="count" style="margin:0 0 12px"></div>
+    <div id="jobList" class="grid"></div>
+  </section>
+</main>
 
-    <section class="trust-strip section-wrap">
-      <span>ONE PLATFORM</span><i></i><span>JOB DISCOVERY</span><i></i><span>PARTNER CONNECTION</span><i></i><span>SMART WORKFLOW</span>
-    </section>
+<div class="modal-backdrop" id="detailModal" onclick="if(event.target===this)closeModal('detailModal')">
+  <div class="modal">
+    <div class="modal-head"><h2 id="detailTitle">求人詳細</h2><button class="secondary" onclick="closeModal('detailModal')">閉じる</button></div>
+    <div id="detailContent"></div>
+    <div class="card-actions" style="margin-top:18px">
+      <button class="secondary" onclick="toggleSaved(STATE.selectedJob.id)">保存する／解除</button>
+      <button class="secondary" onclick="openDownloadOptions('txt')">TXTをダウンロード</button>
+      <button class="secondary" onclick="openDownloadOptions('pdf')">PDFをダウンロード</button>
+      <button onclick="openInquiry()">Version-Kへ問い合わせ</button>
+    </div>
+  </div>
+</div>
 
-    <section class="features-section section-wrap" id="features">
-      <div class="section-heading">
-        <div class="eyebrow">WHAT YOU CAN DO</div>
-        <h2>必要な情報に、<br class="mobile-only">必要なときにアクセス。</h2>
-        <p>求人情報の確認から案件管理まで、日々の業務をシンプルに。</p>
+<div class="modal-backdrop" id="downloadModal" onclick="if(event.target===this)closeModal('downloadModal')">
+  <div class="modal">
+    <div class="modal-head"><h2>求人票のダウンロード</h2><button class="secondary" onclick="closeModal('downloadModal')">閉じる</button></div>
+    <div class="field">
+      <label for="downloadAudience">ダウンロード対象</label>
+      <select id="downloadAudience" onchange="updateDownloadFields()">
+        <option value="business">事業者向け</option>
+        <option value="jobseeker">求職者向け</option>
+      </select>
+    </div>
+    <div id="downloadAmountBox" style="display:none;margin-top:14px">
+      <div class="field">
+        <label for="downloadAmount" id="downloadAmountLabel">金額（今回のダウンロードのみ）</label>
+        <input id="downloadAmount" type="text" inputmode="text" placeholder="金額を入力（例：1,600円〜1,800円）">
       </div>
-      <div class="feature-grid">
-        <article class="feature-card"><div class="feature-icon blue">⌕</div><h3>求人を探す</h3><p>公開中の求人を検索。職種や勤務地などから、条件に合う案件を確認できます。</p><span class="feature-number">01</span></article>
-        <article class="feature-card"><div class="feature-icon violet">☆</div><h3>案件を保存する</h3><p>気になる求人を保存して、あとからスムーズに見返せます。</p><span class="feature-number">02</span></article>
-        <article class="feature-card"><div class="feature-icon mint">↗</div><h3>連携・問い合わせ</h3><p>求人についての問い合わせや、対象に応じた求人資料の取得をサポート。</p><span class="feature-number">03</span></article>
+      <div class="notice" id="downloadAmountNotice" style="margin-top:10px">
+        元の設定額を上限として入力してください。入力した金額は保存されず、今回のダウンロードにのみ反映されます。
       </div>
-    </section>
+    </div>
+    <div class="notice" id="regularSalaryWarning" style="display:none;margin-top:10px;color:#9a3412;background:#fff7ed">
+      注意：正社員案件の場合は、給与額の変更はできません。ご注意ください。
+    </div>
+    <div class="notice" id="regularCompanyCapNotice" style="display:none;margin-top:10px;color:#9a3412;background:#fff7ed">
+      正社員案件の貴社報酬額は、Version-K着金額に貴社との契約手数料率を乗じた金額が上限です。上限額を超える金額は設定できません。
+    </div>
+    <div class="card-actions" style="margin-top:18px">
+      <button onclick="executeDownload()">この内容でダウンロード</button>
+    </div>
+  </div>
+</div>
 
-    <section class="flow-section section-wrap" id="flow">
-      <div class="flow-panel">
-        <div><div class="eyebrow">HOW TO START</div><h2>ご利用はシンプル、<br>3ステップ。</h2><p>アカウントをお持ちのパートナーは、すぐにご利用を開始できます。</p></div>
-        <div class="flow-steps">
-          <div class="flow-step"><b>01</b><div><strong>ログイン</strong><small>発行されたアカウントでログイン</small></div></div>
-          <div class="flow-step"><b>02</b><div><strong>求人を検索</strong><small>公開中の案件から条件に合う求人を確認</small></div></div>
-          <div class="flow-step"><b>03</b><div><strong>連携・活用</strong><small>保存・問い合わせ・資料取得</small></div></div>
-        </div>
+<div class="modal-backdrop" id="inquiryModal" onclick="if(event.target===this)closeModal('inquiryModal')">
+  <div class="modal">
+    <div class="modal-head"><h2>Version-Kへ問い合わせ</h2><button class="secondary" onclick="closeModal('inquiryModal')">閉じる</button></div>
+    <div class="notice" id="inquiryJobLabel"></div>
+    <form id="inquiryForm" onsubmit="submitInquiry(event)">
+      <div class="form-grid">
+        <div class="field"><label>担当者名 *</label><input id="contactName" required maxlength="100"></div>
+        <div class="field"><label>電話番号</label><input id="phone" maxlength="30"></div>
+        <div class="field full"><label>問い合わせ内容 *</label><textarea id="message" required maxlength="3000" placeholder="紹介希望人数、確認したい条件などを入力してください。"></textarea></div>
       </div>
-    </section>
+      <div class="card-actions" style="justify-content:flex-end;margin-top:15px">
+        <button type="button" class="secondary" onclick="closeModal('inquiryModal')">キャンセル</button>
+        <button id="sendInquiry" type="submit">問い合わせを送信</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-    <section class="closing section-wrap">
-      <div class="closing-inner"><div class="eyebrow">WELCOME TO SHOKUBURE</div><h2>パートナーの可能性を、<br>次の成果につなげよう。</h2><p>登録済みの方はこちらから職ブレをご利用ください。</p><a class="button button-primary button-large" href="login.html">ログインして始める <span>→</span></a></div>
-    </section>
-  </main>
-  <footer class="site-footer"><a class="brand" href="index.html"><span class="brand-mark">職</span><span class="brand-word">職ブレ<span class="brand-sub">BUSINESS</span></span></a><span>© <span id="year"></span> SHOKUBURE-Business-</span><a href="login.html">パートナーログイン ↗</a></footer>
-  <script src="assets/js/config.js"></script><script src="assets/js/common.js"></script>
-  <script>
-    (function(){
-      const year=document.getElementById("year");
-      if(year) year.textContent=new Date().getFullYear();
-      const toggle=document.getElementById("menu-toggle");
-      const nav=document.getElementById("header-nav");
-      if(toggle&&nav){
-        toggle.addEventListener("click",function(){
-          const opened=nav.classList.toggle("is-open");
-          toggle.setAttribute("aria-expanded",String(opened));
-          toggle.textContent=opened?"×":"☰";
-        });
-        nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{
-          nav.classList.remove("is-open");toggle.setAttribute("aria-expanded","false");toggle.textContent="☰";
-        }));
+<script>
+  const STATE = {user:null,jobs:[],savedJobs:[],selectedJob:null,tab:"all"};
+  const $ = id => document.getElementById(id);
+
+  function esc(value){
+    return String(value==null?'':value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function notify(message,type){
+    const el=$('notice');el.textContent=message;el.className='notice'+(type?' '+type:'');
+  }
+  function call(name,...args){
+    return new Promise((resolve,reject)=>{
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(err=>reject(new Error(err&&err.message?err.message:String(err))))[name](...args);
+    });
+  }
+  function yen(value){
+    const s=String(value||'').trim();
+    if(!s)return '条件確認';
+    return s;
+  }
+  async function init(){
+    try{
+      const user=await call('getCurrentBusinessUser');
+      if(!user.authenticated){
+        $('userInfo').textContent=user.email||'未認証';
+        notify(user.message||'利用権限がありません。','error');
+        return;
       }
-    })();
-  </script>
+      STATE.user=user;
+      $('userInfo').textContent=user.companyName+'（'+user.accountType+'）';
+      $('app').style.display='block';
+      notify('ログインしました。公開中の求人を表示しています。','success');
+      await loadSavedJobs();
+      await loadJobs();
+    }catch(e){notify(e.message,'error');}
+  }
+  async function loadSavedJobs(){
+    try{
+      STATE.savedJobs=await call('getBusinessSavedJobs');
+      for(const saved of STATE.savedJobs){
+        if(!STATE.jobs.some(j=>j.id===saved.id)){
+          try{ STATE.jobs.push(await call('getBusinessJob',saved.id)); }catch(_e){}
+        }
+      }
+    }catch(e){ notify(e.message,'error'); }
+  }
+  function switchTab(tab){
+    STATE.tab=tab;
+    $('allTab').classList.toggle('active',tab==='all');
+    $('savedTab').classList.toggle('active',tab==='saved');
+    $('allTab').classList.toggle('secondary',tab!=='all');
+    $('savedTab').classList.toggle('secondary',tab!=='saved');
+    $('searchToolbar').style.display=tab==='all'?'grid':'none';
+    if(tab==='saved') loadSavedJobs().then(renderJobs); else renderJobs();
+  }
+  async function toggleSaved(jobId){
+    try{
+      const exists=STATE.savedJobs.some(x=>x.id===jobId);
+      if(exists) await call('removeBusinessSavedJob',jobId);
+      else await call('saveBusinessJob',jobId);
+      await loadSavedJobs();
+      renderJobs();
+      notify(exists?'保存を解除しました。':'求人を保存しました。','success');
+    }catch(e){ notify(e.message,'error'); }
+  }
+  async function loadJobs(){
+    try{
+      const filters={q:$('q').value,businessType:$('businessType').value,location:$('location').value};
+      STATE.jobs=await call('listBusinessJobs',filters);
+      renderJobs();
+    }catch(e){notify(e.message,'error');}
+  }
+  function renderJobs(){
+    const list=STATE.tab==='saved'
+      ? STATE.savedJobs.map(s=>STATE.jobs.find(j=>j.id===s.id)).filter(Boolean)
+      : STATE.jobs;
+    $('count').textContent=list.length+'件の求人'+(STATE.tab==='saved'?'を保存中':'');
+    if(!list.length){
+      $('jobList').innerHTML='<div class="empty" style="grid-column:1/-1">'+(STATE.tab==='saved'?'保存した求人はありません。':'該当する求人がありません。')+'</div>';return;
+    }
+    $('jobList').innerHTML=list.map(job=>{
+      const saved=STATE.savedJobs.some(x=>x.id===job.id);
+      const isRegular=job.employmentType&&job.employmentType.includes('正社員');
+      const price=isRegular
+        ? (job.salary||'給与条件確認')
+        : (job.amount||'条件確認');
+      const rewardLine=isRegular
+        ? `<div class="amount" style="font-size:15px;margin-top:-4px">報酬（紹介手数料）：${esc(job.rewardAmount||'金額確認中')}</div>`
+        : '';
+      return `
+      <article class="card">
+        <div class="tags"><span class="tag">${esc(job.businessType)}</span><span class="tag">${esc(job.employmentType)}</span><span class="tag">募集中</span></div>
+        <h3>${esc(job.title)}</h3>
+        <div class="muted">${esc(job.jobType)}　／　${esc(job.location||'勤務地未設定')}</div>
+        <div class="amount">${esc(price)}</div>
+        ${rewardLine}
+        <div class="muted">${esc(job.remote||'')} ${job.startDate?'／ 開始 '+esc(job.startDate):''}</div>
+        <div class="card-actions">
+          <button onclick="showDetail('${esc(job.id)}')">求人詳細を見る</button>
+          <button class="secondary" onclick="toggleSaved('${esc(job.id)}')">${saved?'保存解除':'保存する'}</button>
+        </div>
+      </article>`;
+    }).join('');
+  }
+  async function showDetail(id){
+    try{
+      const job=await call('getBusinessJob',id);
+      STATE.selectedJob=job;
+      $('detailTitle').textContent=job.title;
+      const isRegular=job.employmentType&&job.employmentType.includes('正社員');
+      const isBpo=!!job.isBpo || String(job.businessType||'').toUpperCase().includes('BPO');
+      const baseItems=[
+        ['事業区分',job.businessType],['職種',job.jobType],['雇用形態',job.employmentType]
+      ].filter(x=>String(x[1]||'').trim()!=='');
+      const compensationItems=isRegular
+        ? [['給与',job.salary],['報酬額',job.rewardAmount],['交通費',job.transport]]
+        : (isBpo ? [['貴社卸単価',job.wholesaleUnit||job.amount],['交通費',job.transport]] : [['給与',job.salary],['交通費',job.transport]]);
+      const detailItems=[
+        ['稼働時間',job.hours],['勤務時間帯',job.schedule],['勤務地',job.location],
+        ['最寄駅',job.station],['リモート条件',job.remote],['休日',job.holidays],
+        ['勤務開始日',job.startDate],['募集終了日',job.endDate]
+      ].filter(x=>String(x[1]||'').trim()!=='');
+      const panel=items=>items.filter(x=>String(x[1]||'').trim()!=='').map(x=>`<div class="detail-item"><span class="muted">${esc(x[0])}</span><b>${esc(x[1])}</b></div>`).join('');
+      const seekerNote=isBpo?'求職者へ提出する際は、候補者に提示する時給に合わせて給与欄を調整してご活用ください。':'求職者へ提出する際は、掲載内容をご確認のうえ、候補者への求人案内にご活用ください。';
+      $('detailContent').innerHTML=`
+        <div class="muted">案件番号：${esc(job.id)}</div>
+        <div class="detail-grid">${panel(baseItems)}</div>
+        <div class="compensation-panel">
+          <h3>給与・報酬</h3>
+          <div class="detail-grid">${panel(compensationItems)}</div>
+          <p class="compensation-note">※給料・報酬額は内定時に確定。<br>金額は税込表示。</p>
+          ${isRegular?'<p class="compensation-note">注意：貴社報酬は、上記金額より貴社契約手数料にてお支払いいたします。</p>':''}
+          ${!isRegular?`<p class="compensation-note">${esc(seekerNote)}</p>`:''}
+        </div>
+        <div class="detail-grid">${panel(detailItems)}</div>
+        ${section('仕事内容',job.description)}
+        ${section('応募条件',job.requirements)}
+        ${section('必須スキル',job.mustSkills)}
+        ${section('歓迎スキル',job.preferredSkills)}
+        ${section('年齢条件',job.age)}
+        ${section('面談回数・選考',job.interview)}
+        ${section('提出書類',job.documents)}
+      `;
+      $('inquiryJobLabel').textContent='対象求人：'+job.title+'（'+job.id+'）';
+      openModal('detailModal');
+    }catch(e){notify(e.message,'error');}
+  }
+  function section(title,value){
+    if(!value)return '';
+    return `<div class="section"><h4>${esc(title)}</h4><p>${esc(value)}</p></div>`;
+  }
+  function openModal(id){$(id).classList.add('show');}
+  function closeModal(id){$(id).classList.remove('show');}
+  let DOWNLOAD_FORMAT='txt';
+  function openDownloadOptions(format){
+    if(!STATE.selectedJob)return;
+    DOWNLOAD_FORMAT=format;
+    $('downloadAudience').value='business';
+    $('downloadAmount').value='';
+    updateDownloadFields();
+    openModal('downloadModal');
+  }
+  function updateDownloadFields(){
+    const job=STATE.selectedJob||{};
+    const audience=$('downloadAudience').value;
+    const isRegular=String(job.employmentType||'').includes('正社員');
+    const isBpo=!!job.isBpo || String(job.businessType||'').toUpperCase().includes('BPO') || String(job.jobType||'').toUpperCase().includes('BPO');
+    const needsAmount=isBpo && audience==='jobseeker';
+    $('downloadAmountBox').style.display=needsAmount?'block':'none';
+    $('regularSalaryWarning').style.display='none';
+    $('regularCompanyCapNotice').style.display='none';
+    $('downloadAmount').required=needsAmount;
+    $('downloadAmount').value='';
+    let label='金額（今回のダウンロードのみ）';
+    let placeholder='元の設定額以内で入力';
+    let notice='元の設定額を上限として入力してください。入力した金額は保存されず、今回のダウンロードにのみ反映されます。';
+    if(isBpo&&audience==='jobseeker'){
+      label='求職者向け給与（時給・今回のダウンロードのみ）';
+      placeholder='例：時給1,500円';
+      notice='元の貴社卸単価を上限として時給を設定できます。求職者に提出する際は、候補者に提示する時給へ調整してご活用ください。';
+    }else if(isBpo&&audience==='business'){
+      label='貴社卸単価（今回のダウンロードのみ）';
+      placeholder='例：時給1,500円';
+      notice='「提携企業向け金額｜管理者・提携企業」に設定された元の貴社卸単価の最高額を上限として入力してください。';
+    }else if(isRegular&&audience==='business'){
+      label='貴社報酬額（今回のダウンロードのみ）';
+      placeholder='契約手数料率を反映した上限以内で入力';
+      notice='Version-K着金額に貴社との契約手数料率を乗じた金額が上限です。';
+    }
+    $('downloadAmountLabel').textContent=label;
+    $('downloadAmount').placeholder=placeholder;
+    $('downloadAmountNotice').textContent=notice;
+  }
+  async function executeDownload(){
+    const job=STATE.selectedJob;if(!job)return;
+    const audience=$('downloadAudience').value;
+    const isRegular=String(job.employmentType||'').includes('正社員');
+    const isBpo=!!job.isBpo || String(job.businessType||'').toUpperCase().includes('BPO') || String(job.jobType||'').toUpperCase().includes('BPO');
+    const needsAmount=isBpo && audience==='jobseeker';
+    const amount=needsAmount?String($('downloadAmount').value).trim():null;
+    if(needsAmount&&!amount){
+      notify('金額を入力してください。','error');return;
+    }
+    try{
+      if(DOWNLOAD_FORMAT==='txt'){
+        const r=await call('downloadBusinessJobText',job.id,audience,amount);
+        const binary=atob(r.base64);const bytes=new Uint8Array(binary.length);
+        for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+        const blob=new Blob([bytes],{type:r.mimeType});
+        const url=URL.createObjectURL(blob);const a=document.createElement('a');
+        a.href=url;a.download=r.fileName;document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+      }else{
+        const r=await call('downloadBusinessJobPdf',job.id,audience,amount);
+        const w=window.open(r.url,'_blank');
+        if(!w)window.location.href=r.downloadUrl;
+      }
+      closeModal('downloadModal');
+      notify('求人票を作成しました。','success');
+    }catch(e){notify(e.message,'error');}
+  }
+  function openInquiry(){
+    if(!STATE.selectedJob)return;
+    $('inquiryForm').reset();
+    closeModal('detailModal');openModal('inquiryModal');
+  }
+  async function submitInquiry(event){
+    event.preventDefault();
+    const btn=$('sendInquiry');btn.disabled=true;btn.textContent='送信中...';
+    try{
+      const r=await call('submitBusinessInquiry',{
+        jobId:STATE.selectedJob.id,
+        contactName:$('contactName').value,
+        phone:$('phone').value,
+        message:$('message').value
+      });
+      closeModal('inquiryModal');
+      notify(r.message+' 問い合わせ番号：'+r.inquiryId,'success');
+    }catch(e){notify(e.message,'error');}
+    finally{btn.disabled=false;btn.textContent='問い合わせを送信';}
+  }
+  init();
+</script>
 </body>
 </html>
+
