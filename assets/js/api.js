@@ -20,6 +20,10 @@ window.ShokubureAPI = (() => {
     sessionStorage.setItem(cfg.EMAIL_KEY, data.email || "");
     return data;
   }
+  async function submitApplication(idToken, payload = {}) {
+    // 未登録ユーザーでもGoogle IDトークン検証後に申請だけは送信できる。
+    return post("submitBusinessApplication", idToken, payload);
+  }
   async function request(action, payload = {}) {
     const idToken = credential();
     if (!idToken) throw new Error("ログイン情報がありません。Googleログインを行ってください。");
@@ -33,5 +37,5 @@ window.ShokubureAPI = (() => {
     sessionStorage.removeItem(cfg.CREDENTIAL_KEY);
     sessionStorage.removeItem(cfg.EMAIL_KEY);
   }
-  return { authenticate, request, credential, clearCredential };
+  return { authenticate, submitApplication, request, credential, clearCredential };
 })();
