@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>Googleログイン｜職ブレ-Business-</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-page">
+  <div class="auth-side">
+    <a class="brand brand-light" href="index.html"><span class="brand-mark">職</span><span class="brand-word">職ブレ<span class="brand-sub">BUSINESS</span></span></a>
+    <div class="auth-side-copy">
+      <div class="eyebrow">PARTNER PORTAL</div>
+      <h1>つながることで、<br><span class="gradient-text">仕事はもっと広がる。</span></h1>
+      <p>求人情報とパートナーをつなぐ、職ブレ-Business-。</p>
+    </div>
+    <div class="auth-side-foot">SECURE PARTNER ACCESS <span>© SHOKUBURE</span></div>
+  </div>
+
+  <main class="auth-main">
+    <a class="back-link" href="index.html">← ホームに戻る</a>
+    <section class="auth-card">
+      <div class="auth-card-mark">職</div>
+      <div class="eyebrow">WELCOME BACK</div>
+      <h2>ログイン</h2>
+      <p class="auth-description">登録済みのGoogleアカウントでログインしてください。</p>
+
+      <div id="google-signin" class="google-login-area">
+        <div id="g_id_onload"
+          data-client_id="490441638610-hb6vqjd0o1a608n8glubko8kta5el407.apps.googleusercontent.com"
+          data-callback="handleGoogleCredential"
+          data-auto_prompt="false"></div>
+        <div class="g_id_signin"
+          data-type="standard" data-size="large" data-theme="outline"
+          data-text="signin_with" data-shape="rectangular"
+          data-logo_alignment="left" data-width="320"></div>
+      </div>
+
+      <div id="login-message" class="form-message" role="status" aria-live="polite"></div>
+      <div id="login-loading" class="auth-help" hidden>Googleアカウントを確認しています…</div>
+      <div class="auth-help">利用登録が有効なGoogleアカウントのみログインできます。利用申請・登録内容の確認は管理者へお問い合わせください。</div>
+    </section>
+    <div class="auth-main-foot">職ブレ-Business- <span>SECURE ACCESS</span></div>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    "use strict";
+
+    function setMessage(message, isError) {
+      const el = document.getElementById("login-message");
+      el.textContent = message || "";
+      el.style.color = isError ? "#dc2626" : "#15803d";
+    }
+
+    function setLoading(loading) {
+      document.getElementById("login-loading").hidden = !loading;
+      document.getElementById("google-signin").style.opacity = loading ? "0.55" : "1";
+      document.getElementById("google-signin").style.pointerEvents = loading ? "none" : "auto";
+    }
+
+    // Google Identity Services が呼び出すグローバルコールバック
+    window.handleGoogleCredential = async function(response) {
+      if (!response || !response.credential) {
+        setMessage("Googleログイン情報を取得できませんでした。もう一度お試しください。", true);
+        return;
+      }
+
+      setLoading(true);
+      setMessage("Googleアカウントを確認しています…", false);
+      window.ShokubureAPI.clearCredential();
+
+      try {
+        const result = await window.ShokubureAPI.authenticate(response.credential);
+        setMessage("認証に成功しました。画面を移動します。", false);
+        // 管理者も一般利用者もアプリ側で権限に応じた画面を表示
+        window.location.replace("app.html");
+      } catch (error) {
+        window.ShokubureAPI.clearCredential();
+        setMessage(error && error.message ? error.message : "ログインに失敗しました。", true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    window.addEventListener("load", function() {
+      const cfg = window.SHOKUBURE_CONFIG;
+      if (!cfg || !cfg.GOOGLE_CLIENT_ID || !cfg.API_BASE_URL) {
+        setMessage("Google認証またはGAS接続の設定が不足しています。管理者へお問い合わせください。", true);
+      }
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        setMessage("Googleログインを読み込めませんでした。ページを再読み込みしてください。", true);
+      }
+    });
+  </script>
+  <style>
+    .google-login-area{display:flex;justify-content:center;align-items:center;min-height:54px;margin:24px 0 14px}
+    #login-message{min-height:24px;margin:10px 0 16px;font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+    #login-loading{margin:0 0 12px}
+  </style>
+</body>
+</html>
