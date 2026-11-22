@@ -1,0 +1,22 @@
+.admin-panel{margin-top:22px;background:#fff;border:1px solid #e8edf4;border-radius:12px;padding:24px;min-width:0}
+.admin-panel-head{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:18px}
+.admin-panel-head h2{font-size:17px;margin:9px 0 5px}.admin-panel-head p,.admin-note{font-size:11px;color:#8491a5;margin:0;line-height:1.8}
+.table-wrap{width:100%;overflow-x:auto}
+.admin-table{width:100%;border-collapse:collapse;min-width:780px;font-size:11px;text-align:left}
+.admin-table th{background:#f7f9fc;color:#7c8aa1;font-size:9px;letter-spacing:.04em;font-weight:800;white-space:nowrap}
+.admin-table th,.admin-table td{padding:13px 11px;border-bottom:1px solid #edf0f5;vertical-align:middle}
+.admin-table td{color:#53627a}.admin-table td strong{color:#25334b}
+.table-empty{text-align:center!important;color:#929eb0!important;padding:28px!important}
+.action-cell{white-space:nowrap}
+.table-action{border:0;border-radius:6px;padding:7px 11px;font-size:10px;font-weight:800;margin-right:5px;background:#edf2ff;color:#4d70d5}
+.table-action.approve{background:#e8f7f1;color:#218765}.table-action.reject{background:#fff0f0;color:#c45b64}.table-action.edit{background:#edf2ff;color:#4d70d5}
+.status-label{display:inline-block;padding:5px 8px;border-radius:5px;background:#f0f2f6;color:#6d7a8f;font-size:9px;font-weight:800;white-space:nowrap}
+.status-label.pending{background:#fff5df;color:#a77b2c}.status-label.active{background:#e8f7f1;color:#218765}.status-label.stopped{background:#fff0f0;color:#c45b64}
+.admin-note{margin-top:13px}.stat-error{color:#c45b64!important}
+.admin-dialog{width:min(440px,calc(100% - 28px));border:0;border-radius:14px;padding:0;box-shadow:0 25px 80px #101b2e44}
+.admin-dialog::backdrop{background:#101b2e88}
+.admin-dialog form{padding:25px}.dialog-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}.dialog-head h2{font-size:18px;margin:8px 0}.dialog-x{border:0;background:none;font-size:25px;color:#7b879a}
+.admin-dialog label{display:block;font-size:11px;font-weight:800;color:#53617a;margin:13px 0}
+.admin-dialog input,.admin-dialog select{display:block;width:100%;height:42px;border:1px solid #dfe5ee;border-radius:7px;padding:0 11px;margin-top:7px;background:#fff;color:#26334a}
+.dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}
+@media(max-width:650px){.admin-panel{padding:17px 13px}.admin-panel-head{align-items:flex-start;flex-direction:column}.admin-panel-head .button{align-self:flex-end}.admin-table{min-width:760px}}
