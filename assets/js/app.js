@@ -236,6 +236,57 @@ document.addEventListener("DOMContentLoaded", () => {
       window.setTimeout(()=>location.replace("login.html"),900);
     }
   }
+  function setupAdminNavigation(me){
+    const adminEmail = "yama.78.ken3@gmail.com";
+    const signedInEmail = String(me && me.email || "").trim().toLowerCase();
+    const isDesignatedAdmin = signedInEmail === adminEmail;
+    const sidebar = $("sidebar");
+    if (!sidebar) return;
+
+    // HTML側に管理画面リンクがなくても、管理者ログイン時だけサイドバーへ追加する。
+    let adminLink = $("admin-nav-link");
+    if (!adminLink) {
+      adminLink = document.createElement("button");
+      adminLink.type = "button";
+      adminLink.id = "admin-nav-link";
+      adminLink.className = "side-link admin-side-link";
+      adminLink.innerHTML = '<span aria-hidden="true">盾</span> 管理画面 <b aria-hidden="true">›</b>';
+
+      const sidebarBottom = sidebar.querySelector(".sidebar-bottom");
+      if (sidebarBottom) sidebar.insertBefore(adminLink, sidebarBottom);
+      else sidebar.appendChild(adminLink);
+    }
+
+    adminLink.hidden = !isDesignatedAdmin;
+    if (isDesignatedAdmin && !adminLink.dataset.bound) {
+      adminLink.dataset.bound = "true";
+      adminLink.addEventListener("click", () => {
+        // admin.html 側でもGAS APIによる管理者権限検証を必ず行う。
+        location.href = "admin.html";
+      });
+    }
+
+    if (!document.getElementById("admin-nav-style")) {
+      const style = document.createElement("style");
+      style.id = "admin-nav-style";
+      style.textContent = `
+        #admin-nav-link[hidden]{display:none!important}
+        .admin-side-link{
+          margin-top:14px;
+          width:calc(100% - 14px);
+          color:#eaf2ff!important;
+          background:linear-gradient(110deg,#263e68,#354b83)!important;
+          border:1px solid rgba(125,166,255,.48)!important;
+          box-shadow:0 8px 22px rgba(31,75,160,.18);
+          text-align:left;
+        }
+        .admin-side-link span{color:#a9c5ff;font-weight:800;margin-right:8px}
+        .admin-side-link b{margin-left:auto;color:#a9c5ff;font-size:20px}
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
   async function init(){
     try{
       const me=await request("getCurrentBusinessUser");
@@ -245,13 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
       $("user-email").textContent=me.email||"";
       $("user-avatar").textContent=(me.companyName||"P").slice(0,1);
 
-      // 管理画面リンクは指定管理者アカウントだけに表示する。
-      const adminLink = $("admin-nav-link");
-      if (adminLink) {
-        const signedInEmail = String(me.email || "").trim().toLowerCase();
-        const isDesignatedAdmin = signedInEmail === "yama.78.ken3@gmail.com";
-        adminLink.hidden = !isDesignatedAdmin;
-      }
+      setupAdminNavigation(me);
 
       await loadSavedJobs();
       await loadJobs();
