@@ -19,6 +19,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const request = (action,payload={}) => ShokubureAPI.request(action,payload);
   const money = (v, fallback="条件確認") => String(v == null || v === "" ? fallback : v);
 
+  if (!document.getElementById("recruiting-company-style")) {
+    const style = document.createElement("style");
+    style.id = "recruiting-company-style";
+    style.textContent = ".job-company-name{margin-top:7px;color:#315b91;font-size:12px;font-weight:800;line-height:1.7}";
+    document.head.appendChild(style);
+  }
+
   if (!window.ShokubureAPI || !ShokubureAPI.credential()) {
     location.replace("login.html"); return;
   }
@@ -62,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="job-card-top"><span class="job-tag">${esc(job.businessType||"求人案件")}</span>
           <button class="save-job ${saved?"saved":""}" data-save="${esc(job.id)}" aria-label="${saved?"保存解除":"求人を保存"}">${saved?"★":"☆"}</button></div>
         <h3>${esc(job.title)}</h3>
+        ${job.recruitingCompanyName?`<div class="job-company-name">採用企業：${esc(job.recruitingCompanyName)}</div>`:""}
         <div class="job-meta"><span>${esc(job.jobType||"職種未設定")}</span><span>・</span><span>${esc(job.location||"勤務地未設定")}</span></div>
         <div class="job-card-foot"><span>${esc(job.employmentType||"")}</span><span>${esc(price)}</span><b>詳細を見る →</b></div>
       </article>`;
@@ -129,7 +137,12 @@ document.addEventListener("DOMContentLoaded", () => {
       STATE.selectedJob=job;
       const regular=String(job.employmentType||"").includes("正社員");
       const bpo=!!job.isBpo||String(job.businessType||"").toUpperCase().includes("BPO");
-      const base=[["事業区分",job.businessType],["職種",job.jobType],["雇用形態",job.employmentType]];
+      const base=[
+        ["事業区分",job.businessType],
+        ["職種",job.jobType],
+        ["雇用形態",job.employmentType],
+        ["採用企業",job.recruitingCompanyName]
+      ];
       const compensation=regular
         ? [["給与",job.salary],["報酬額（紹介手数料）",job.rewardAmount],["交通費",job.transport]]
         : (bpo?[["貴社卸単価",job.wholesaleUnit||job.amount],["交通費",job.transport]]:[["給与",job.salary],["交通費",job.transport]]);
