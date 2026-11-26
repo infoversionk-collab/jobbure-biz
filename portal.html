@@ -1,1 +1,163 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>職ブレ｜ポータル</title><style>body{font-family:system-ui,sans-serif;background:#f4f6fb;color:#172033;margin:0}.wrap{max-width:900px;margin:10vh auto;padding:24px}.card{background:white;border:1px solid #e0e6ef;border-radius:18px;padding:28px;margin:16px 0}a{display:inline-block;background:#185abc;color:white;text-decoration:none;padding:12px 18px;border-radius:9px;margin:8px 8px 0 0}p{color:#64748b;line-height:1.8}</style></head><body><main class="wrap"><h1>職ブレ ポータル</h1><p>利用目的に合わせてログインしてください。</p><section class="card"><h2>企業・人材紹介会社・個人代理店</h2><p>求人検索、保存、事業者向け求人票のダウンロード、Version-Kへの問い合わせ。</p><a href="./business/login.html">事業者ログイン</a></section><section class="card"><h2>求職者</h2><p>公開求人の閲覧、求人への問い合わせ、問い合わせ履歴の確認。</p><a href="./candidate/candidate-login.html">求職者ログイン</a></section></main></body></html>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07101f">
+<meta name="description" content="職ブレは、企業と求職者の可能性をつなぐマッチングプラットフォームです。">
+<title>職ブレ | 可能性と可能性を、つなぐ。</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap');
+:root{--bg:#07101f;--panel:#0c1a2d;--line:rgba(143,190,255,.16);--text:#f4f8ff;--muted:#9aabc4;--cyan:#50e5ff;--blue:#548bff;--purple:#9a78ff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:"DM Sans","Noto Sans JP",sans-serif;overflow-x:hidden}a{color:inherit;text-decoration:none}button{font:inherit}
+body:before{content:"";position:fixed;inset:0;z-index:-3;background:radial-gradient(ellipse at 75% 16%,rgba(50,119,255,.19),transparent 35%),radial-gradient(ellipse at 10% 65%,rgba(49,218,255,.09),transparent 34%),linear-gradient(135deg,#07101f 0%,#091629 52%,#07101f 100%)}
+.grid-bg{position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.19;background-image:linear-gradient(rgba(125,172,255,.11) 1px,transparent 1px),linear-gradient(90deg,rgba(125,172,255,.11) 1px,transparent 1px);background-size:58px 58px;mask-image:linear-gradient(to bottom,black,transparent 88%)}
+header{height:82px;display:flex;align-items:center;justify-content:space-between;max-width:1240px;padding:0 34px;margin:auto;position:relative;z-index:5}
+.logo{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.09em;font-size:23px}.logo-mark{width:34px;height:34px;border:1px solid rgba(80,229,255,.7);border-radius:10px;display:grid;place-items:center;color:var(--cyan);box-shadow:0 0 22px rgba(80,229,255,.18);font-size:18px}
+.logo small{display:block;font-size:8px;letter-spacing:.25em;color:#7e96b8;font-weight:600;margin-top:2px}
+.nav{display:flex;align-items:center;gap:30px;color:#aabbd3;font-size:12px}.nav a:hover{color:var(--cyan)}
+.header-cta{border:1px solid rgba(80,229,255,.55);border-radius:999px;padding:12px 20px;color:#dffaff;font-size:12px;font-weight:700;background:rgba(40,125,180,.1);transition:.25s}.header-cta:hover{background:rgba(80,229,255,.17);box-shadow:0 0 24px rgba(80,229,255,.2)}
+.hero{max-width:1240px;min-height:680px;padding:86px 34px 74px;margin:auto;display:grid;grid-template-columns:1.04fr .96fr;align-items:center;gap:30px;position:relative}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;color:var(--cyan);font-size:10px;letter-spacing:.23em;font-weight:800}.eyebrow:before{content:"";width:26px;height:1px;background:var(--cyan);box-shadow:0 0 9px var(--cyan)}
+h1{font-size:clamp(42px,5.3vw,72px);line-height:1.28;letter-spacing:.025em;margin:24px 0 20px;font-weight:900}.gradient{background:linear-gradient(95deg,#f5fbff 0%,#8beeff 42%,#7b9cff 75%,#c2a5ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:15px;line-height:2.15;color:#a9bad1;max-width:540px;letter-spacing:.04em}
+.hero-actions{display:flex;align-items:center;gap:14px;margin-top:34px;flex-wrap:wrap}
+.primary{display:inline-flex;align-items:center;justify-content:center;gap:18px;padding:17px 25px;border-radius:8px;background:linear-gradient(100deg,#42dff5,#5e8dff);color:#061326;font-weight:900;font-size:13px;box-shadow:0 10px 34px rgba(61,179,255,.24);transition:.25s;border:0;cursor:pointer}
+.primary:hover{transform:translateY(-3px);box-shadow:0 14px 38px rgba(61,179,255,.4)}
+.secondary{display:inline-flex;align-items:center;gap:12px;padding:16px 21px;border:1px solid rgba(159,190,230,.24);border-radius:8px;color:#c7d5e8;font-size:12px;transition:.2s}.secondary:hover{border-color:var(--cyan);color:var(--cyan)}
+.hero-note{margin-top:28px;color:#7287a5;font-size:10px;letter-spacing:.08em}
+.visual{height:500px;position:relative;display:grid;place-items:center;isolation:isolate}
+.orbit{position:absolute;border:1px solid rgba(90,174,255,.2);border-radius:50%;transform:rotate(-23deg);box-shadow:inset 0 0 30px rgba(75,151,255,.04),0 0 25px rgba(55,147,255,.04)}
+.orbit.one{width:430px;height:230px}.orbit.two{width:530px;height:300px;transform:rotate(42deg);border-color:rgba(80,229,255,.13)}.orbit.three{width:330px;height:330px;border-style:dashed;border-color:rgba(133,150,255,.2)}
+.core{width:190px;height:190px;border-radius:50%;display:grid;place-items:center;position:relative;background:radial-gradient(circle at 35% 28%,rgba(83,230,255,.26),rgba(41,98,180,.18) 42%,rgba(10,24,46,.9) 72%);border:1px solid rgba(109,224,255,.55);box-shadow:0 0 50px rgba(48,171,255,.22),inset 0 0 45px rgba(69,180,255,.13)}
+.core:before,.core:after{content:"";position:absolute;border-radius:50%;inset:-17px;border:1px solid rgba(80,229,255,.24);animation:pulse 4s ease-in-out infinite}.core:after{inset:-34px;border-color:rgba(128,142,255,.17);animation-delay:1s}
+.core-word{text-align:center;font-size:31px;font-weight:900;letter-spacing:.12em;text-shadow:0 0 24px rgba(80,229,255,.7)}.core-word small{display:block;font-size:8px;letter-spacing:.3em;color:#9bc9e8;margin-top:8px}
+.float-card{position:absolute;padding:14px 17px;border-radius:10px;background:rgba(9,25,47,.82);border:1px solid rgba(126,191,255,.23);backdrop-filter:blur(14px);box-shadow:0 15px 45px rgba(0,0,0,.2);min-width:150px}
+.float-card .tiny{font-size:8px;color:#829ab9;letter-spacing:.16em}.float-card strong{display:block;font-size:13px;margin-top:6px}.float-card .dot{display:inline-block;width:6px;height:6px;background:var(--cyan);border-radius:50%;margin-right:7px;box-shadow:0 0 10px var(--cyan)}
+.card-a{top:62px;left:4px}.card-b{right:-5px;top:150px}.card-c{left:16px;bottom:55px}
+.connection{position:absolute;width:8px;height:8px;background:var(--cyan);border-radius:50%;box-shadow:0 0 18px 5px rgba(80,229,255,.32)}.p1{top:80px;right:90px}.p2{bottom:94px;right:85px;background:#9b8aff}
+.scroll{position:absolute;bottom:25px;left:34px;color:#657b99;font-size:9px;letter-spacing:.22em;display:flex;align-items:center;gap:12px}.scroll:after{content:"";height:1px;width:46px;background:#46617f}
+.section{max-width:1160px;margin:0 auto;padding:90px 34px}.section-head{text-align:center;margin-bottom:45px}.section-head .eyebrow{justify-content:center}.section h2{font-size:clamp(26px,3.4vw,40px);line-height:1.45;margin:17px 0 12px;letter-spacing:.04em}.section-head p{color:var(--muted);font-size:12px;line-height:1.9}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.feature{padding:28px 25px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,rgba(16,39,67,.72),rgba(8,21,39,.58));min-height:190px;position:relative;overflow:hidden}.feature:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-55px;bottom:-65px;background:rgba(65,174,255,.1);filter:blur(5px)}.feature .num{color:var(--cyan);font-size:10px;letter-spacing:.2em}.feature h3{font-size:16px;margin:20px 0 10px}.feature p{font-size:11px;line-height:1.9;color:#91a5c0;margin:0}
+.gateway{padding-top:65px;padding-bottom:105px}.gateway-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.gateway-card{position:relative;overflow:hidden;border-radius:15px;border:1px solid rgba(123,180,255,.24);padding:34px;background:linear-gradient(140deg,rgba(19,49,79,.88),rgba(9,22,41,.95));min-height:290px;transition:.25s}
+.gateway-card:hover{transform:translateY(-4px);border-color:rgba(80,229,255,.65);box-shadow:0 18px 45px rgba(0,0,0,.22)}
+.gateway-card.company{background:linear-gradient(140deg,rgba(36,36,81,.85),rgba(10,22,42,.96))}
+.gateway-card:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-80px;top:-80px;border:1px solid rgba(80,229,255,.2);box-shadow:0 0 0 25px rgba(80,229,255,.025),0 0 0 55px rgba(80,229,255,.02)}
+.gateway-label{font-size:9px;color:var(--cyan);letter-spacing:.22em;font-weight:800}.gateway-card h3{font-size:26px;margin:18px 0 8px}.gateway-card p{color:#a2b4cc;font-size:12px;line-height:1.9;max-width:360px}.gateway-list{display:flex;gap:8px;flex-wrap:wrap;margin:23px 0}.gateway-list span{font-size:9px;color:#c2d2e8;border:1px solid rgba(154,190,230,.2);border-radius:4px;padding:7px 9px}.gateway-link{display:inline-flex;align-items:center;gap:18px;margin-top:8px;color:#e5fbff;font-size:12px;font-weight:800}.gateway-link b{font-size:19px;color:var(--cyan);font-weight:400}
+.bottom-cta{max-width:1160px;margin:0 auto 90px;padding:52px 30px;text-align:center;border:1px solid rgba(89,187,255,.2);border-radius:16px;background:radial-gradient(ellipse at center,rgba(51,128,221,.2),rgba(9,23,43,.85) 70%);position:relative;overflow:hidden}.bottom-cta h2{font-size:clamp(23px,3vw,34px);margin:0 0 13px}.bottom-cta p{font-size:12px;color:#9fb2cd;margin:0 0 25px}
+footer{border-top:1px solid rgba(135,174,220,.12);padding:28px 34px;max-width:1240px;margin:auto;display:flex;align-items:center;justify-content:space-between;color:#6f829d;font-size:9px;letter-spacing:.08em}.footer-brand{color:#b7c8df;font-weight:800;font-size:13px;letter-spacing:.12em}
+.modal-backdrop{position:fixed;inset:0;background:rgba(1,7,16,.78);backdrop-filter:blur(12px);z-index:20;display:none;align-items:center;justify-content:center;padding:20px}.modal-backdrop.open{display:flex}.modal{width:min(680px,100%);border:1px solid rgba(103,196,255,.35);border-radius:16px;background:linear-gradient(145deg,#102541,#091426);padding:34px;box-shadow:0 25px 90px rgba(0,0,0,.55);position:relative}.modal-close{position:absolute;right:18px;top:15px;background:transparent;border:0;color:#9bb1cc;font-size:25px;cursor:pointer}.modal-kicker{font-size:9px;letter-spacing:.22em;color:var(--cyan)}.modal h2{font-size:25px;margin:12px 0 8px}.modal>p{font-size:11px;color:#9aadc6;line-height:1.8;margin:0 0 23px}.modal-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal-option{display:block;padding:21px;border-radius:10px;border:1px solid rgba(130,180,230,.24);background:rgba(8,21,40,.65);transition:.2s}.modal-option:hover{border-color:var(--cyan);background:rgba(48,126,176,.12)}.modal-option .symbol{font-size:23px;color:var(--cyan)}.modal-option strong{display:block;margin:12px 0 7px;font-size:15px}.modal-option span{font-size:10px;line-height:1.7;color:#9aadc6}.modal-option em{display:block;margin-top:15px;font-style:normal;font-size:10px;color:var(--cyan);font-weight:800}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.07);opacity:.35}}
+@media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:65px;gap:0}.hero-copy{position:relative;z-index:2}.visual{height:390px;margin-top:10px}.orbit.one{width:340px;height:190px}.orbit.two{width:400px;height:240px}.orbit.three{width:270px;height:270px}.core{width:155px;height:155px}.core-word{font-size:26px}.card-a{left:7%;top:25px}.card-b{right:5%;top:100px}.card-c{left:8%;bottom:20px}.features{grid-template-columns:1fr}.feature{min-height:0}.nav{gap:16px}}
+@media(max-width:600px){header{height:70px;padding:0 20px}.logo{font-size:19px}.nav{display:none}.header-cta{padding:10px 14px;font-size:10px}.hero{padding:65px 22px 40px;min-height:auto}.eyebrow{font-size:8px}h1{font-size:42px;margin:19px 0 16px}.lead{font-size:12px}.hero-actions{align-items:stretch;flex-direction:column}.primary,.secondary{justify-content:center;width:100%}.hero-note{font-size:9px}.visual{height:330px;margin:0 -12px}.orbit.one{width:280px;height:155px}.orbit.two{width:330px;height:195px}.orbit.three{width:225px;height:225px}.core{width:130px;height:130px}.core-word{font-size:22px}.float-card{min-width:125px;padding:10px 12px}.float-card strong{font-size:11px}.card-a{left:0;top:24px}.card-b{right:0;top:90px}.card-c{left:1%;bottom:10px}.section{padding:65px 22px}.section-head{margin-bottom:28px}.section-head p{font-size:11px}.gateway-grid{grid-template-columns:1fr}.gateway-card{padding:26px;min-height:270px}.gateway-card h3{font-size:23px}.bottom-cta{margin:0 18px 65px;padding:40px 20px}footer{padding:24px 20px;gap:12px;flex-direction:column;align-items:flex-start}.modal{padding:28px 20px}.modal h2{font-size:21px}.modal-options{grid-template-columns:1fr}.modal-option{padding:17px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+<header>
+  <a class="logo" href="./portal.html" aria-label="職ブレ トップ">
+    <span class="logo-mark">V</span><span>職ブレ<small>SHOKUBURE MATCHING PLATFORM</small></span>
+  </a>
+  <nav class="nav" aria-label="メインナビゲーション">
+    <a href="#about">ABOUT</a><a href="#service">SERVICE</a><a href="#entry">FOR YOU</a>
+  </nav>
+  <button class="header-cta" data-open-modal>ログイン・利用してみる ↗</button>
+</header>
+
+<main>
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">CONNECTING PEOPLE & BUSINESS</div>
+    <h1>可能性と可能性を、<br><span class="gradient">つなぐ。</span></h1>
+    <p class="lead">仕事を探す人と、新しい仲間を求める企業。<br>職ブレは、一人ひとりの可能性と企業の未来をつなぐ<br>マッチングプラットフォームです。</p>
+    <div class="hero-actions">
+      <button class="primary" data-open-modal>ログイン・利用してみる <span>→</span></button>
+      <a class="secondary" href="#about">職ブレについて知る <span>↓</span></a>
+    </div>
+    <div class="hero-note">FIND YOUR NEXT POSSIBILITY. BUILD THE NEXT FUTURE.</div>
+  </div>
+  <div class="visual" aria-label="人と企業をつなぐネットワークのイメージ">
+    <div class="orbit one"></div><div class="orbit two"></div><div class="orbit three"></div>
+    <div class="core"><div class="core-word">職ブレ<small>THE NEXT CONNECTION</small></div></div>
+    <div class="float-card card-a"><div class="tiny">FOR TALENT</div><strong><i class="dot"></i>新しい仕事との出会い</strong></div>
+    <div class="float-card card-b"><div class="tiny">FOR BUSINESS</div><strong><i class="dot"></i>新しい人材との出会い</strong></div>
+    <div class="float-card card-c"><div class="tiny">MATCHING</div><strong>可能性を、次のステージへ。</strong></div>
+    <span class="connection p1"></span><span class="connection p2"></span>
+  </div>
+  <div class="scroll">SCROLL TO DISCOVER</div>
+</section>
+
+<section class="section" id="about">
+  <div class="section-head">
+    <div class="eyebrow">ABOUT SHOKUBURE</div>
+    <h2>人と企業の出会いに、<br><span class="gradient">新しい選択肢を。</span></h2>
+    <p>働く人にも、企業にも。出会いの可能性を広げる仕組みを。</p>
+  </div>
+  <div class="features">
+    <article class="feature"><div class="num">01 / FOR PEOPLE</div><h3>自分に合う仕事を見つける</h3><p>さまざまな求人情報から、自分の希望やスキルに合った仕事との出会いを探せます。</p></article>
+    <article class="feature"><div class="num">02 / FOR COMPANY</div><h3>必要な人材とつながる</h3><p>求人掲載やオファー活動を通じて、企業の採用活動と人材との接点を広げます。</p></article>
+    <article class="feature"><div class="num">03 / FOR PARTNERS</div><h3>企業同士の協業を広げる</h3><p>BPO案件などを通じて、企業間の協業や新しいビジネス機会の創出をサポートします。</p></article>
+  </div>
+</section>
+
+<section class="section gateway" id="service">
+  <div class="section-head">
+    <div class="eyebrow">CHOOSE YOUR GATEWAY</div>
+    <h2>あなたの目的に合わせて、<br>職ブレをはじめよう。</h2>
+    <p>個人の方も、法人の方も。利用目的に合わせた専用ページへ進めます。</p>
+  </div>
+  <div class="gateway-grid" id="entry">
+    <a class="gateway-card" href="candidate/candidate-login.html">
+      <div class="gateway-label">01 / PERSONAL</div>
+      <h3>仕事を探す</h3>
+      <p>新しい働き方、新しい職場、新しい自分。あなたの可能性につながる仕事を探そう。</p>
+      <div class="gateway-list"><span>求人を探す</span><span>求人の詳細を見る</span><span>問い合わせ</span></div>
+      <span class="gateway-link">求職者として利用する <b>→</b></span>
+    </a>
+    <a class="gateway-card company" href="business/login.html">
+      <div class="gateway-label">02 / BUSINESS</div>
+      <h3>法人として利用する</h3>
+      <p>採用活動から企業間協業まで。企業の成長につながる機会を職ブレで。</p>
+      <div class="gateway-list"><span>オファー活動</span><span>求人の掲載・閲覧</span><span>協業BPO</span></div>
+      <span class="gateway-link">企業専用ページへ <b>→</b></span>
+    </a>
+  </div>
+</section>
+
+<section class="bottom-cta">
+  <h2>次の可能性は、ここから。</h2>
+  <p>あなたに合った入口から、職ブレをはじめてください。</p>
+  <button class="primary" data-open-modal>ログイン・利用してみる <span>→</span></button>
+</section>
+</main>
+
+<footer><div class="footer-brand">職ブレ <span style="color:#6e87a7;font-size:8px;font-weight:500">SHOKUBURE</span></div><div>© <span id="year"></span> SHOKUBURE. ALL RIGHTS RESERVED.</div></footer>
+
+<div class="modal-backdrop" id="entryModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <button class="modal-close" aria-label="閉じる" data-close-modal>×</button>
+    <div class="modal-kicker">WELCOME TO SHOKUBURE</div>
+    <h2 id="modalTitle">どちらの目的で利用しますか？</h2>
+    <p>利用目的を選択してください。選択した専用ページへ移動します。</p>
+    <div class="modal-options">
+      <a class="modal-option" href="candidate/candidate-login.html"><div class="symbol">⌁</div><strong>個人として利用する</strong><span>仕事を探す・求人情報を見る</span><em>求職者ログインへ →</em></a>
+      <a class="modal-option" href="business/login.html"><div class="symbol">▦</div><strong>法人として利用する</strong><span>オファー活動・求人掲載・協業BPO</span><em>企業ログインへ →</em></a>
+    </div>
+  </div>
+</div>
+<script>
+(()=> {
+  const modal=document.getElementById('entryModal');
+  const open=()=>{modal.classList.add('open');document.body.style.overflow='hidden';};
+  const close=()=>{modal.classList.remove('open');document.body.style.overflow='';};
+  document.querySelectorAll('[data-open-modal]').forEach(el=>el.addEventListener('click',open));
+  document.querySelectorAll('[data-close-modal]').forEach(el=>el.addEventListener('click',close));
+  modal.addEventListener('click',e=>{if(e.target===modal)close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+  document.getElementById('year').textContent=new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
