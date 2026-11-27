@@ -1,25 +1,308 @@
-【職ブレ-Business-｜login.html 修正箇所】
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>ログイン｜職ブレ-Business-</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="stylesheet" href="assets/css/shokubure-neon.css">
+  <link rel="stylesheet" href="assets/css/cosmos.css">
+</head>
+<body class="auth-page">
+  <div class="auth-side">
+    <a class="brand brand-light" href="index.html"><span class="brand-mark">職</span><span class="brand-word">職ブレ<span class="brand-sub">BUSINESS</span></span></a>
+    <div class="auth-side-copy">
+      <div class="eyebrow">PARTNER PORTAL</div>
+      <h1>つながることで、<br><span class="gradient-text">仕事はもっと広がる。</span></h1>
+      <p>求人情報とパートナーをつなぐ、職ブレ-Business-。</p>
+    </div>
+    <div class="auth-side-foot">SECURE PARTNER ACCESS <span>© SHOKUBURE</span></div>
+  </div>
 
-以下の箇所を、現在の login.html 内で検索して置き換えてください。
-それ以外のHTML・JavaScript・CSSは変更しないでください。
+  <main class="auth-main">
+    <a class="back-link" href="index.html">← ホームに戻る</a>
+    <section class="auth-card">
+      <div class="auth-card-mark">職</div>
+      <div class="eyebrow">PARTNER PORTAL</div>
+      <h2>ログイン</h2>
+      <p class="auth-description">登録済みのGoogleアカウントでログインしてください。</p>
 
-■ 変更前
-<div id="g_id_onload"
-  data-client_id="490441638610-hb6vqjd0o1a608n8glubko8kta5el407.apps.googleusercontent.com"
-  data-callback="handleGoogleCredential"
-  data-auto_prompt="false"></div>
+      <div id="google-signin" class="google-login-area">
+        <div id="g_id_onload"
+          data-client_id="519298085651-3iq9ecmtem9451suuno2mgv3jmao2qs4.apps.googleusercontent.com"
+          data-callback="handleGoogleCredential"
+          data-auto_prompt="false"></div>
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"
+          data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-width="320"></div>
+      </div>
 
-■ 変更後
-<div id="g_id_onload"
-  data-client_id="519298085651-3iq9ecmtem9451suuno2mgv3jmao2qs4.apps.googleusercontent.com"
-  data-callback="handleGoogleCredential"
-  data-auto_prompt="false"></div>
+      <div id="login-message" class="form-message" role="status" aria-live="polite"></div>
+      <div id="login-loading" class="auth-help" hidden>Googleアカウントを確認しています…</div>
 
-■ 保存後の確認
-1. GitHubリポジトリの login.html を保存・コミットする。
-2. 公開ページへ反映された後、ブラウザで強制再読み込みする。
-3. Googleログインを再テストする。
+      <div class="signup-divider"><span>初めてご利用の方</span></div>
+      <button type="button" id="show-signup" class="signup-toggle">新規登録・利用申請</button>
 
-注意：
-・API_BASE_URL、フォーム処理、認証コールバックなどは変更しない。
-・このファイル内の data-client_id が新しいIDになっていることを確認する。
+      <form id="signup-form" class="signup-form" hidden>
+        <p class="signup-intro">Googleアカウントで本人確認後、以下の内容を送信してください。管理者の確認・承認後にログインできます。</p>
+        <label for="companyName">企業名・代理店名 <span>必須</span></label>
+        <input id="companyName" name="companyName" type="text" maxlength="120" required placeholder="例：株式会社〇〇">
+        <label for="accountType">利用区分 <span>必須</span></label>
+        <select id="accountType" name="accountType" required>
+          <option value="企業">企業</option>
+          <option value="個人代理店">個人代理店</option>
+        </select>
+        <label for="contactName">担当者名 <span>必須</span></label>
+        <input id="contactName" name="contactName" type="text" maxlength="80" required placeholder="例：山田 太郎">
+        <label for="phone">電話番号</label>
+        <input id="phone" name="phone" type="tel" maxlength="40" placeholder="例：090-1234-5678">
+        <label for="applicationMessage">備考・お問い合わせ</label>
+        <textarea id="applicationMessage" name="message" rows="3" maxlength="1000" placeholder="利用目的など（任意）"></textarea>
+        <button type="submit" id="submit-signup" class="signup-submit">利用申請を送信</button>
+        <p class="signup-note">申請しただけでは利用開始になりません。管理者による審査後、登録されたGoogleアカウントでログインできます。</p>
+      </form>
+
+      <div class="auth-help">ログイン・利用申請にはGoogleアカウントを使用します。利用登録が有効なアカウントのみ求人機能を利用できます。</div>
+    </section>
+    <div class="auth-main-foot">職ブレ-Business- <span>SECURE ACCESS</span></div>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    "use strict";
+    let verifiedGoogleToken = "";
+
+    function setMessage(message, isError) {
+      const el = document.getElementById("login-message");
+      el.textContent = message || "";
+      el.style.color = isError ? "#dc2626" : "#15803d";
+    }
+
+    function setLoading(loading) {
+      document.getElementById("login-loading").hidden = !loading;
+      document.getElementById("google-signin").style.opacity = loading ? "0.55" : "1";
+      document.getElementById("google-signin").style.pointerEvents = loading ? "none" : "auto";
+    }
+
+    window.handleGoogleCredential = async function(response) {
+      if (!response || !response.credential) {
+        setMessage("Googleログイン情報を取得できませんでした。もう一度お試しください。", true);
+        return;
+      }
+
+      setLoading(true);
+      setMessage("Googleアカウントを確認しています…", false);
+      window.ShokubureAPI.clearCredential();
+      verifiedGoogleToken = "";
+
+      try {
+        const result = await window.ShokubureAPI.authenticate(response.credential);
+        verifiedGoogleToken = response.credential;
+
+        if (result.registered || result.admin) {
+          setMessage("認証に成功しました。画面を移動します。", false);
+          window.location.replace("app.html");
+          return;
+        }
+
+        setMessage("Google認証が完了しました。新規登録・利用申請から申請してください。", false);
+        document.getElementById("signup-form").hidden = false;
+        document.getElementById("signup-form").scrollIntoView({ behavior: "smooth", block: "center" });
+      } catch (error) {
+        window.ShokubureAPI.clearCredential();
+        setMessage(error && error.message ? error.message : "ログインに失敗しました。", true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    document.getElementById("show-signup").addEventListener("click", function() {
+      const form = document.getElementById("signup-form");
+      form.hidden = !form.hidden;
+      if (!form.hidden) {
+        form.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+
+    document.getElementById("signup-form").addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      if (!verifiedGoogleToken) {
+        setMessage("先にGoogleログインを行ってください。", true);
+        return;
+      }
+
+      const button = document.getElementById("submit-signup");
+      button.disabled = true;
+      button.textContent = "送信中…";
+
+      try {
+        const payload = {
+          companyName: document.getElementById("companyName").value.trim(),
+          accountType: document.getElementById("accountType").value,
+          contactName: document.getElementById("contactName").value.trim(),
+          phone: document.getElementById("phone").value.trim(),
+          message: document.getElementById("applicationMessage").value.trim()
+        };
+
+        const result = await window.ShokubureAPI.submitApplication(verifiedGoogleToken, payload);
+        setMessage(result.message || "利用申請を受け付けました。", false);
+        document.getElementById("signup-form").reset();
+        document.getElementById("signup-form").hidden = true;
+        document.getElementById("show-signup").textContent = "申請を受け付けました";
+        document.getElementById("show-signup").disabled = true;
+      } catch (error) {
+        setMessage(error && error.message ? error.message : "申請を送信できませんでした。", true);
+      } finally {
+        button.disabled = false;
+        button.textContent = "利用申請を送信";
+      }
+    });
+
+    window.addEventListener("load", function() {
+      const cfg = window.SHOKUBURE_CONFIG;
+
+      if (!cfg || !cfg.GOOGLE_CLIENT_ID || !cfg.API_BASE_URL) {
+        setMessage("Google認証またはGAS接続の設定が不足しています。管理者へお問い合わせください。", true);
+      }
+
+      if (!window.ShokubureAPI) {
+        setMessage("GAS接続用APIを読み込めませんでした。config.jsとapi.jsを確認してください。", true);
+        return;
+      }
+
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        setMessage("Googleログインを読み込めませんでした。ページを再読み込みしてください。", true);
+        return;
+      }
+
+      if (cfg && cfg.GOOGLE_CLIENT_ID) {
+        const loginConfig = document.getElementById("g_id_onload");
+        if (loginConfig) {
+          loginConfig.setAttribute("data-client_id", cfg.GOOGLE_CLIENT_ID);
+        }
+      }
+    });
+  </script>
+
+  <style>
+    .google-login-area {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 54px;
+      margin: 24px 0 14px;
+    }
+
+    #login-message {
+      min-height: 24px;
+      margin: 10px 0 16px;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    #login-loading {
+      margin: 0 0 12px;
+    }
+
+    .signup-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 26px 0 14px;
+      color: #8b98ad;
+      font-size: 12px;
+    }
+
+    .signup-divider:before,
+    .signup-divider:after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: #e5eaf2;
+    }
+
+    .signup-toggle,
+    .signup-submit {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font: 700 14px "Noto Sans JP", sans-serif;
+      cursor: pointer;
+    }
+
+    .signup-toggle {
+      background: #f2f5ff;
+      color: #425de8;
+      border: 1px solid #dce3ff;
+    }
+
+    .signup-submit {
+      margin-top: 18px;
+      background: linear-gradient(110deg, #4777f5, #6957e9);
+      color: #fff;
+    }
+
+    .signup-form {
+      margin-top: 18px;
+      padding: 20px;
+      border: 1px solid #e4e9f2;
+      border-radius: 14px;
+      text-align: left;
+      background: #fbfcff;
+    }
+
+    .signup-form[hidden] {
+      display: none;
+    }
+
+    .signup-intro,
+    .signup-note {
+      font-size: 12px;
+      line-height: 1.8;
+      color: #7d8ba2;
+    }
+
+    .signup-form label {
+      display: block;
+      margin: 14px 0 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #40506a;
+    }
+
+    .signup-form label span {
+      color: #e05252;
+      font-size: 10px;
+    }
+
+    .signup-form input,
+    .signup-form select,
+    .signup-form textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #dce3ee;
+      border-radius: 8px;
+      background: #fff;
+      font: 13px "Noto Sans JP", sans-serif;
+      color: #25324a;
+    }
+
+    .signup-form textarea {
+      resize: vertical;
+    }
+
+    .signup-form button:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+  </style>
+</body>
+</html>
