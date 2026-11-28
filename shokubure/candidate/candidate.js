@@ -103,11 +103,30 @@ async function loadProfile(){
 async function saveProfile(e){
   e.preventDefault();const button=$("saveProfile");setBusy(button,true,"保存中…");
   try{
-    const data=collectProfile(e.currentTarget);
+    const formData=collectProfile(e.currentTarget);
     const required=["name","phone","birthDate","address","education","graduation","educationDetail","qualifications","selfPr","summary","experience","workDetails","achievements","skills"];
-    const missing=required.filter(k=>!String(data[k]||"").trim());
+    const missing=required.filter(k=>!String(formData[k]||"").trim());
     if(missing.length)throw Error("履歴書・職務経歴書の必須項目をすべて入力してください。");
+
+    // GAS側 candidateSaveProfile_ は resume / workHistory の2階層で保存する。
+    // 画面フォームのフラットな値を、保存APIが受け取る形式へ変換する。
+    const data={
+      resume:{
+        name:formData.name, phone:formData.phone, birthDate:formData.birthDate,
+        address:formData.address, email:formData.email, education:formData.education,
+        graduation:formData.graduation, educationDetail:formData.educationDetail,
+        qualifications:formData.qualifications, selfPr:formData.selfPr
+      },
+      workHistory:{
+        summary:formData.summary, experience:formData.experience,
+        workDetails:formData.workDetails, achievements:formData.achievements,
+        skills:formData.skills
+      },
+      allowScouts:formData.allowScouts
+    };
     const result=await api("candidateSaveProfile",data);
+    // 保存直後にサーバーから再取得し、永続化できた内容を画面へ反映する。
+    await loadProfile();
     status(result.message||"プロフィール・応募書類を保存しました。","profileStatus");
   }catch(e){status(e.message,"profileStatus")}finally{setBusy(button,false)}
 }
