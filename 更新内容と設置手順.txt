@@ -1,0 +1,37 @@
+職ブレ 最新版（2026-11-28）
+================================
+
+■今回反映した変更
+- 職ブレ-Business-および求職者ページが参照するGAS API接続先を、指定されたWEB URLへ統一しました。
+- candidate-config.js は共通 assets/js/config.js のAPI_BASE_URLを参照するため、求職者ページも同じ接続先になります。
+- 既存のGoogle OAuth Client ID、Google IDトークン認証、画面構成、APIアクション名、既存のスプレッドシートID等は変更していません。
+- ZIP内の不要なmacOSメタデータを除外しています。
+
+■接続先
+https://script.google.com/macros/s/AKfycbw7FatvmG7WNK5kbKXkOY95TPzooj6eGTkC0CBD1e2mI6QbidCRMRQs1nOs2QGuxVRZBg/exec
+
+■配置先
+GitHub Pagesリポジトリの既存構成に合わせて配置してください。
+- ルート直下の index.html
+- shokubure/ 以下のファイル一式
+
+■重要：GAS本体について
+今回アップロードされた元ZIPにはGASのCode.gs等のサーバー側ソースは含まれていません。
+そのため、この更新版で変更したのはフロントエンドの接続URLのみです。
+指定URLのGASが、現在のフロントエンドから呼び出す各APIアクション
+（auth、submitBusinessApplication、businessListCandidates、businessSendScout、
+candidateMe、candidateRegister、candidateSaveProfile、candidateApplyJob、
+candidatePublicListJobs、candidatePublicGetJob 等）を実装しているかは、
+ソースコードを確認できていないため未検証です。
+また、指定URLへのGET/POST疎通もこの環境から確認できていません。
+
+■安全な反映手順
+1. GitHubリポジトリと現在のGASプロジェクトをそれぞれバックアップ。
+2. このZIPの index.html と shokubure/ をGitHub Pagesへ反映。
+3. 公開後、強制再読み込み（Mac: Command + Shift + R）。
+4. 法人ログイン、法人申請、求人一覧・詳細、求職者Googleログイン、会員登録、プロフィール保存、応募、スカウトの順に動作確認。
+5. APIエラーが出た場合は、GAS側の実装とレスポンス形式（{ok:true,data:...}）を照合。
+
+■GASの完全な最新版を作成するために必要なもの
+指定WEB URLに紐づくApps ScriptプロジェクトのCode.gsおよび全てのHTML/JS等のGASファイルをエクスポートして共有してください。
+それを受け取れば、フロントエンドのAPI呼び出しと照合し、認証・権限・求職者情報の匿名化・応募書類チェック・スカウト同意の再検証まで含めてサーバー側を完成させられます。
