@@ -11,5 +11,5 @@ window.CANDIDATE_CONFIG = {
   GOOGLE_CLIENT_ID:
     (window.SHOKUBURE_CONFIG &&
       window.SHOKUBURE_CONFIG.GOOGLE_CLIENT_ID) ||
-    "490441638610-hb6vqjd0o1a608n8glubko8kta5el407.apps.googleusercontent.com"
+    "519298085651-3iq9ecmtem9451suuno2mgv3jmao2qs4.apps.googleusercontent.com"
 };
