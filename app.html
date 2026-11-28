@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b1220">
+  <title>求人検索｜職ブレ-Business-</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/shokubure-neon.css">  <link rel="stylesheet" href="assets/css/cosmos.css">
+</head>
+<body class="app-page">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="index.html"><span class="brand-mark">職</span><span class="brand-word">職ブレ<span class="brand-sub">BUSINESS</span></span></a>
+    <div class="sidebar-label">WORKSPACE</div>
+    <button class="side-link active" id="all-filter"><span>⌕</span> 求人一覧</button>
+    <button class="side-link" id="saved-filter"><span>☆</span> 保存した求人</button>
+    <a class="side-link" href="messages.html"><span>✉</span> メッセージ</a>
+    <div class="sidebar-bottom"><div class="user-mini"><div class="user-avatar" id="user-avatar">P</div><div><b id="user-company">パートナー</b><small id="user-email">ログイン確認中</small></div></div><button id="logout-button" class="logout-link">ログアウト ↗</button></div>
+  </aside>
+  <main class="app-main">
+    <header class="app-topbar"><button class="menu-toggle app-menu-toggle" id="sidebar-toggle">☰</button><div><div class="eyebrow">PARTNER WORKSPACE</div><h1>求人を探す</h1></div><div class="topbar-right"><span class="status-dot"></span><span>PARTNER ACCESS</span></div></header>
+    <section class="app-welcome"><div><h2>次の可能性につながる求人を。</h2><p>公開中の案件を検索・確認できます。</p></div><div class="welcome-mark">職</div></section>
+    <section class="search-panel" id="search-panel">
+      <div class="search-field"><span>⌕</span><input id="search-query" type="search" placeholder="求人名・職種・キーワードで検索"></div>
+      <select id="business-type"><option value="">すべての事業区分</option><option value="BPO">BPO</option><option value="人材紹介">人材紹介</option></select>
+      <input id="location-query" type="search" placeholder="勤務地">
+      <button class="button button-primary" id="search-button">検索</button>
+    </section>
+    <div id="app-notice" class="app-notice" hidden></div><div class="results-heading"><div><h2 id="results-title">公開中の求人</h2><p id="results-caption">条件に合う案件を表示します。</p></div><span class="results-count" id="results-count">-- 件</span></div>
+    <div id="job-list" class="job-grid"><div class="empty-state"><div class="loading-spinner"></div><b>求人情報を読み込んでいます</b><p>API接続の準備ができると、ここに求人が表示されます。</p></div></div>
+    <div class="app-footer">職ブレ-Business- <span>PARTNER PLATFORM</span></div>
+  </main>
+  <div class="modal-backdrop" id="job-modal" aria-hidden="true"><section class="job-modal"><button class="modal-close" id="modal-close" aria-label="閉じる">×</button><div id="job-detail"></div></section></div>
+  <div class="modal-backdrop" id="download-modal" aria-hidden="true"><section class="job-modal compact-modal">
+    <button class="modal-close" type="button" onclick="document.getElementById('download-modal').classList.remove('open');document.body.style.overflow=''">×</button>
+    <h2 class="detail-title">求人票のダウンロード</h2>
+    <label class="modal-label" for="download-audience">ダウンロード対象</label>
+    <select id="download-audience"><option value="business">事業者向け</option><option value="jobseeker">求職者向け</option></select>
+    <div id="download-amount-box" hidden>
+      <label class="modal-label" id="download-amount-label" for="download-amount">求職者向け給与</label>
+      <input id="download-amount" type="text" placeholder="例：時給1,500円">
+      <p class="detail-note" id="download-amount-notice"></p>
+    </div>
+    <button class="button button-primary modal-main-button" id="download-execute">この内容でダウンロード</button>
+  </section></div>
+  <div class="modal-backdrop" id="inquiry-modal" aria-hidden="true"><section class="job-modal compact-modal">
+    <button class="modal-close" type="button" onclick="document.getElementById('inquiry-modal').classList.remove('open');document.body.style.overflow=''">×</button>
+    <h2 class="detail-title">Version-Kへ問い合わせ</h2>
+    <p class="detail-note" id="inquiry-job-label"></p>
+    <form id="inquiry-form">
+      <label class="modal-label" for="inquiry-contact">担当者名 *</label><input id="inquiry-contact" required maxlength="100">
+      <label class="modal-label" for="inquiry-phone">電話番号</label><input id="inquiry-phone" maxlength="30">
+      <label class="modal-label" for="inquiry-message">問い合わせ内容 *</label><textarea id="inquiry-message" required maxlength="3000" placeholder="紹介希望人数、確認したい条件などを入力してください。"></textarea>
+      <button class="button button-primary modal-main-button" id="inquiry-submit" type="submit">問い合わせを送信</button>
+    </form>
+  </section></div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="assets/js/config.js"></script><script src="assets/js/api.js"></script><script src="assets/js/app.js"></script>
+<style>
+  .side-link.active{background:#263b5d;color:#fff}
+  .app-notice{margin:16px 0;padding:11px 14px;border-radius:9px;background:#eaf2fb;color:#28527e;font-size:12px}
+  .app-notice.error{background:#fff0f0;color:#a33}
+  .detail-kicker{font:800 9px "DM Sans";letter-spacing:.15em;color:#6d83c9}
+  .detail-title{font-size:21px;margin:12px 38px 12px 0;color:#1d2b43}
+  .detail-tags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+  .detail-tags span{font-size:10px;padding:6px 9px;border-radius:5px;background:#edf2ff;color:#5879d7}
+  .detail-heading{font-size:13px;margin:22px 0 9px;color:#344765}
+  .detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .detail-item{background:#f6f8fb;padding:11px;border-radius:8px;min-width:0}
+  .detail-item span{display:block;font-size:10px;color:#8490a2}
+  .detail-item b{display:block;font-size:12px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:4px;color:#26364f}
+  .detail-note{font-size:10px;line-height:1.8;color:#8490a2;margin:9px 0}
+  .detail-section{border-top:1px solid #edf0f5;padding:15px 0 2px}
+  .detail-section h4{font-size:12px;color:#667797;margin:0 0 7px}
+  .detail-section p{font-size:12px;line-height:1.9;white-space:pre-wrap;color:#58677f;margin:0}
+  .detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+  .detail-actions .button{font-size:11px;min-height:40px}
+  .button-secondary{background:#edf1f7;color:#40516d;border:1px solid #e0e6ef}
+  .compact-modal{width:min(520px,100%)}
+  .modal-label{display:block;font-size:11px;font-weight:700;color:#475569;margin:14px 0 6px}
+  .compact-modal input,.compact-modal select,.compact-modal textarea{width:100%;padding:11px 12px;border:1px solid #dce3ee;border-radius:8px;background:#fff;font:13px "Noto Sans JP",sans-serif;color:#25324a}
+  .compact-modal textarea{min-height:110px;resize:vertical}
+  .modal-main-button{width:100%;margin-top:18px;min-height:44px}
+  [hidden]{display:none!important}
+  @media(max-width:560px){.detail-grid{grid-template-columns:1fr}.detail-actions{display:grid;grid-template-columns:1fr 1fr}.detail-actions button:last-child{grid-column:1/-1}}
+</style>
+</body>
+</html>
