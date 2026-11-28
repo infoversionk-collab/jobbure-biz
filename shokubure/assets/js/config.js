@@ -1,0 +1,4 @@
+/* 職ブレ-matching- 接続設定：法人はメールアドレス＋パスワード方式 */
+window.SHOKUBURE_CONFIG = {
+  API_BASE_URL: "https://script.google.com/macros/s/AKfycbw7FatvmG7WNK5kbKXkOY95TPzooj6eGTkC0CBD1e2mI6QbidCRMRQs1nOs2QGuxVRZBg/exec"
+};
